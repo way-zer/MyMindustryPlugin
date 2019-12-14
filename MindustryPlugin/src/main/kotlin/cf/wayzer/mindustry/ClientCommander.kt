@@ -17,6 +17,7 @@ object ClientCommander {
 //            onVote(arrayOf("kick", arg[1]), p)
 //        }
         handler.register("maps", "[page]", "查看服务器地图", ::onMaps)
+        handler.register("slots", "查看自动存档"){_,p:Player->p.sendMessage(Helper.listBackup())}
         handler.register("vote", "<map/gameOver/kick/skipWave/rollback> [params]",
                 "进行投票:换图/投降/踢人/跳波/回滚", ::onVote)
     }
@@ -53,7 +54,7 @@ object ClientCommander {
                     }
                 }
             }
-            "fallback" -> {
+            "rollback" -> {
                 if (arg.size < 2)
                     return player.sendMessage("[red]请输入存档编号")
                 val id = arg[1].toIntOrNull()

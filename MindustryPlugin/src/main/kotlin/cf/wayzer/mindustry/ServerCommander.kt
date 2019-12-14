@@ -7,9 +7,9 @@ import io.anuke.mindustry.io.SaveIO
 
 object ServerCommander {
     fun register(handler: CommandHandler) {
-        handler.register("mMaps", "[page]", ::onMaps)
-        handler.register("mHost", "[id] [mode]", ::onChange)
-        handler.register("mLoad", "<id>", ::onLoad)
+        handler.register("mMaps", "[page]","List maps", ::onMaps)
+        handler.register("mHost", "[id] [mode]","Change map", ::onChange)
+        handler.register("mLoad", "<id>","Load save", ::onLoad)
     }
 
     private fun onMaps(arg: Array<String>) {
@@ -18,7 +18,7 @@ object ServerCommander {
     }
 
     private fun onChange(arg: Array<String>) {
-        val map = arg.getOrNull(0)?.toIntOrNull()?.let { Config.maps[it] } ?: Helper.nextMap(world.map)
+        val map = arg.getOrNull(0)?.toIntOrNull()?.let { Config.maps[it-1] } ?: Helper.nextMap(world.map)
         val mode = arg.getOrNull(1)?.let { Gamemode.valueOf(it) } ?: Helper.bestMode(map)
         Helper.loadMap(map, mode)
         Helper.logToConsole("[green]Change to {name:${map.name()} file:${map.file} author:${map.author()}} with Mode ${mode.name}")

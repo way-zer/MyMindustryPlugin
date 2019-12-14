@@ -1,5 +1,6 @@
 package cf.wayzer.mindustry
 
+import io.anuke.arc.Core
 import io.anuke.arc.files.FileHandle
 import io.anuke.arc.util.ColorCodes
 import io.anuke.arc.util.Log
@@ -14,8 +15,10 @@ import kotlin.math.ceil
 object Helper {
     fun loadMap(map: Map = nextMap(), mode: Gamemode = bestMode(map)) {
         resetAndLoad {
+            Vars.logic.reset()
             Vars.world.loadMap(map, map.applyRules(mode))
             Vars.state.rules = Vars.world.map.applyRules(mode)
+            Vars.logic.play()
         }
     }
 
@@ -79,22 +82,23 @@ object Helper {
     }
 
     fun bestMode(map: Map): Gamemode {
-        return arrayOf(Gamemode.attack, Gamemode.pvp).firstOrNull { it.valid(map) } ?: Gamemode.survival
+        return Gamemode.bestFit(map.rules())
+//        return arrayOf(Gamemode.attack, Gamemode.pvp).firstOrNull { it.valid(map) } ?: Gamemode.survival
     }
 
     private fun resetAndLoad(callBack: () -> Unit) {
-        val players = Vars.playerGroup.all().copy()
-        players.forEach { it.dead = true }
-        Vars.logic.reset()
-        callBack()
-        Call.onWorldDataBegin()
-        Vars.logic.play()
-        players.forEach {
-            if (it.con == null) return@forEach
-            it.reset()
-            if (Vars.state.rules.pvp)
-                it.team = Vars.netServer.assignTeam(it, players.toMutableList())
-            Vars.netServer.sendWorldData(it)
+        Core.app.post {
+            val players = Vars.playerGroup.all().copy()
+            players.forEach { it.dead = true }
+            callBack()
+            Call.onWorldDataBegin()
+            players.forEach {
+                if (it.con == null) return@forEach
+                it.reset()
+                if (Vars.state.rules.pvp)
+                    it.team = Vars.netServer.assignTeam(it, players.toMutableList())
+                Vars.netServer.sendWorldData(it)
+            }
         }
     }
 }

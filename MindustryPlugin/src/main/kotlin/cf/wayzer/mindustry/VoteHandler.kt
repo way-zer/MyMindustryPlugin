@@ -3,6 +3,7 @@ package cf.wayzer.mindustry
 import cf.wayzer.mindustry.Helper.broadcast
 import io.anuke.mindustry.Vars.playerGroup
 import io.anuke.mindustry.entities.type.Player
+import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max
 
@@ -12,6 +13,7 @@ object VoteHandler {
     var doing = false
         private set
     private val voted = mutableListOf<String>()
+    private var task:TimerTask?=null
     var otherData: Any = ""
     fun startVote(text: String, callback: CallBack): Boolean {
         if (doing) {
@@ -19,7 +21,7 @@ object VoteHandler {
         }
         doing = true
         broadcast("[yellow]$text 投票开始,输入y同意")
-        Main.timer.schedule(Config.voteTime) {
+        task = Main.timer.schedule(Config.voteTime) {
             val require = max(playerGroup.size() / 2, 1)
             if (voted.size > require) {
                 broadcast("[yellow]$text 投票结束,投票成功.[green]${voted.size}/${playerGroup.size()}[yellow],超过[red]$require [yellow]人")
@@ -28,6 +30,7 @@ object VoteHandler {
                 broadcast("[yellow]$text 投票结束,投票失败.[green]${voted.size}/${playerGroup.size()}[yellow],未超过[red]$require [yellow]人")
             }
             voted.clear()
+            task=null
             doing = false
         }
         return true
@@ -39,6 +42,11 @@ object VoteHandler {
             return player.sendMessage("[red]你已经投过票了")
         voted.add(player.uuid ?: "UNOWNED")
         player.sendMessage("[green]投票成功")
+        val require = max(playerGroup.size() / 2, 1)
+        if(voted.size > require){
+            task?.cancel()
+            task?.run()
+        }
     }
 
 

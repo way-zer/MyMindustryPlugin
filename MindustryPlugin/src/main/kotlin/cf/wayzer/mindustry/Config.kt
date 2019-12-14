@@ -12,14 +12,16 @@ object Config {
         |[green]欢迎来到本服务器[]
         |常用指令:
         |  [yellow]/maps[] 查看所有地图
+        |  [yellow]/slots[] 查看自动存档
         |  [yellow]/vote[] 投票命令
         |    [green]/vote map x[] 投票选图
         |    [green]/vote kick xxx[] 投票踢人
-        |    [green]/vote gameover[] 投票投降
-        |    [green]/vote fallback[] 投票回滚(15分钟自动保存)
-        |    [green]/vote skipwave[] 投票快进跳波
+        |    [green]/vote gameOver[] 投票投降
+        |    [green]/vote rollback[] 投票回滚(10分钟自动保存)
+        |    [green]/vote skipWave[] 投票快进跳波
         """.trimMargin()
-    val voteTime = TimeUnit.SECONDS.toMillis(10)
+    val pluginLog = Vars.tmpDirectory.child("PluginLog.log")
+    val voteTime = TimeUnit.SECONDS.toMillis(60)
     val saveRange = 100..105 //From 100->105
     val voteSaveSolt = 111
     val nextSaveTime: Date
@@ -35,3 +37,4 @@ object Config {
             return Vars.maps.customMaps()
         }
 }
+
