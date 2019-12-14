@@ -1,0 +1,40 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
+}
+group 'cf.wayzer'
+version '1.0'
+ext{
+    mindistryVersion= '-SNAPSHOT'
+}
+
+sourceCompatibility = 1.8
+shadowJar {
+    configurations = [project.configurations.shadow]
+    include("*.jar")
+    include("cf/wayzer/**")
+    include("plugin.json")
+}
+
+repositories {
+//    jcenter()
+    maven{ url "http://maven.aliyun.com/nexus/content/groups/public/"}
+    maven{ url 'https://www.jitpack.io' }
+    maven{ url "https://dl.bintray.com/way-zer/maven" }
+}
+
+dependencies {
+    shadow 'cf.wayzer:LibraryManager:1.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindistryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindistryVersion"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}

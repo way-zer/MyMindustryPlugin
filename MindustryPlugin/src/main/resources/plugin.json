@@ -1,0 +1,7 @@
+{
+  "name": "MyMindustryPlugin",
+  "author": "WayZer",
+  "main": "cf.wayzer.mindustry.Main",
+  "description": "More commands and features.",
+  "version": "1.0"
+}
