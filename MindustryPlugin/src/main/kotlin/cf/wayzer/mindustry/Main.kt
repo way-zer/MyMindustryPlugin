@@ -50,6 +50,15 @@ class Main : Plugin() {
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"))
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"))
                 require(Dependency("org.jetbrains:annotations:13.0"))
+
+                require(Dependency("org.mapdb:mapdb:3.0.7"))
+                require(Dependency("org.eclipse.collections:eclipse-collections:10.1.0"))
+                require(Dependency("org.eclipse.collections:eclipse-collections-api:10.1.0"))
+                require(Dependency("org.eclipse.collections:eclipse-collections-forkjoin:10.1.0"))
+                require(Dependency("com.google.guava:guava:28.1-jre"))
+                require(Dependency("net.jpountz.lz4:lz4:1.3.0"))
+                require(Dependency("org.mapdb:elsa:3.0.0-M5"))
+
                 Loader.load(this)
             }
         }

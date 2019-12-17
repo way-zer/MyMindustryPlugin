@@ -1,6 +1,8 @@
 package cf.wayzer.mindustry
 
+import cf.wayzer.mindustry.Config.Data.playerData
 import io.anuke.arc.util.CommandHandler
+import io.anuke.mindustry.Vars.playerGroup
 import io.anuke.mindustry.Vars.world
 import io.anuke.mindustry.game.Gamemode
 import io.anuke.mindustry.io.SaveIO
@@ -10,6 +12,7 @@ object ServerCommander {
         handler.register("mMaps", "[page]","List maps", ::onMaps)
         handler.register("mHost", "[id] [mode]","Change map", ::onChange)
         handler.register("mLoad", "<id>","Load save", ::onLoad)
+        handler.register("mAddExp","<playerId> <num>","Add Exp to Player", ::onAddExp)
     }
 
     private fun onMaps(arg: Array<String>) {
@@ -31,5 +34,14 @@ object ServerCommander {
             return Helper.logToConsole("[red]Slot is invalid")
         Helper.loadSave(file)
         Helper.logToConsole("[green]Load slot Success.")
+    }
+
+    private fun onAddExp(arg: Array<String>){
+        val player = arg.getOrNull(0)?.let {id-> playerGroup.find { it.uuid==id } }
+                ?: return Helper.logToConsole("[red]Error id. Can't find player")
+        val num = arg.getOrNull(1)?.toIntOrNull()
+                ?: return Helper.logToConsole("[red]Error num.")
+        playerData[player.uuid] = playerData[player.uuid]!!.addExp(num)
+        Helper.logToConsole("[green]Add Success.")
     }
 }

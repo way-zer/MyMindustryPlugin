@@ -1,25 +1,64 @@
 package cf.wayzer.mindustry
 
+import cf.wayzer.mindustry.Config.Data.playerData
 import io.anuke.arc.Core
 import io.anuke.arc.Events
 import io.anuke.arc.util.CommandHandler
-import io.anuke.mindustry.Vars.logic
+import io.anuke.arc.util.Time
+import io.anuke.mindustry.Vars
+import io.anuke.mindustry.Vars.*
 import io.anuke.mindustry.entities.type.Player
 import io.anuke.mindustry.game.EventType
 import io.anuke.mindustry.game.Team
+import io.anuke.mindustry.gen.Call
 import io.anuke.mindustry.io.SaveIO
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
+import kotlin.math.min
 
 object ClientCommander {
     fun register(handler: CommandHandler) {
         handler.removeCommand("vote")
-//        handler.removeCommand("votekick")
-//        handler.register<Player>("votekick", "<player>", "投票踢人(/vote kick <player>)") { arg, p ->
-//            onVote(arrayOf("kick", arg[1]), p)
-//        }
+        handler.removeCommand("votekick")
+        handler.register<Player>("votekick", "<player>", "投票踢人(/vote kick <player>)") { arg, p ->
+            onVote(arrayOf("kick", arg[1]), p)
+        }
+
+        handler.register("status","查看服务器状态",::onStatus)
+        handler.register("info","查看个人信息",::onInfo)
         handler.register("maps", "[page]", "查看服务器地图", ::onMaps)
         handler.register("slots", "查看自动存档"){_,p:Player->p.sendMessage(Helper.listBackup())}
         handler.register("vote", "<map/gameOver/kick/skipWave/rollback> [params]",
                 "进行投票:换图/投降/踢人/跳波/回滚", ::onVote)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStatus(arg: Array<String>, player: Player){
+        player.sendMessage("""
+            |[green]服务器状态[]
+            |   [green]地图: [yellow]${Vars.world.map.name()}[]
+            |   [green]${(60f/Time.delta()).toInt()} FPS, ${Core.app.javaHeap /1024/1024} MB used[]
+        """.trimMargin())
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onInfo(arg: Array<String>, player: Player){
+        val text =with(playerData[player.uuid]!!){
+            """
+            | [#DEA82A] ${player.name}个人信息[]
+            | [#2B60DE]=======================================[]
+            | [green]用户名[]:$lastName
+            | [green]UUID[]:$uuid
+            | [green]Ip地址[]:$lastAddress
+            | [green]总在线时间(分钟)[]:${playedTime/60}
+            | [green]当前等级[]:$level
+            | [green]当前经验[]:[blue]$exp[]/${getMaxExp()}
+            | [#2B60DE]=======================================[]
+            | [yellow]说明: 因为性能考虑,数据不会动态刷新. 经验目前只能通过活动奖励
+        """.trimMargin()
+        }
+        Call.onInfoMessage(player.con,text)
     }
 
     private fun onVote(arg: Array<String>, player: Player) {
@@ -33,8 +72,11 @@ object ClientCommander {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
                 val map = Config.maps[id - 1]
-                VoteHandler.startVote("换图") {
+                VoteHandler.startVote("换图($id: [yellow]${map.name()}[])") {
                     Helper.loadMap(map)
+                    Main.timer.schedule(TimeUnit.SECONDS.toMillis(5)){
+                        Helper.broadcast("[green]换图成功,当前地图[yellow]${map.name()}[green](id: $id)")
+                    }
                 }
                 Core.app.post { }
             }
@@ -49,7 +91,8 @@ object ClientCommander {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
                 VoteHandler.startVote("跳波") {
-                    for (i in 0..9) {
+                    val waves = min(2,10-state.wave/20)
+                    for (i in 0 until waves) {
                         logic.runWave()
                     }
                 }
@@ -68,10 +111,30 @@ object ClientCommander {
                 file.copyTo(voteFile)
                 VoteHandler.startVote("回档") {
                     Helper.loadSave(voteFile)
+                    Main.timer.schedule(TimeUnit.SECONDS.toMillis(5)){
+                        Helper.broadcast("[green]回档成功")
+                    }
+                }
+            }
+            "kick" ->{
+                if (arg.size < 2)
+                    return player.sendMessage("[red]请输入玩家Id")
+                val name = arg[1]
+                val target = playerGroup.find { it.name==name }
+                        ?: return player.sendMessage("[red]玩家未找到")
+                val result= VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
+                    VoteHandler.otherData = ""
+                    netServer.admins.banPlayer(target.uuid)
+                    Config.pluginLog.writeString("[Kick] ${Date()}: ${target.name}(${target.uuid},${target.con.address}) By ${player.name}")
+                }
+                if(result){
+                    VoteHandler.otherData = "KICK-"+target.uuid
+                }else if ("KICK-"+target.uuid == VoteHandler.otherData){
+                    VoteHandler.handleVote(player)
                 }
             }
             else -> {
-                player.sendMessage("[red]开发中,请使用默认踢人功能")
+                player.sendMessage("[red]请检查输入是否正确")
             }
         }
     }
