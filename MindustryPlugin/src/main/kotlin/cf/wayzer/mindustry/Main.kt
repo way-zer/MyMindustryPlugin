@@ -16,10 +16,11 @@ import kotlin.concurrent.schedule
 class Main : Plugin() {
     override fun init() {
         Listener.register()
-        timer.schedule(Config.nextSaveTime,::autoSave)
+        hackServerControl()
+        timer.schedule(Config.nextSaveTime, ::autoSave)
     }
 
-    private fun autoSave(that :TimerTask){
+    private fun autoSave(that: TimerTask) {
         if (Vars.state.`is`(GameState.State.playing)) {
             val minute = ((that.scheduledExecutionTime() / TimeUnit.MINUTES.toMillis(1)) % 60).toInt() //Get the minute
             Core.app.post {
@@ -27,7 +28,7 @@ class Main : Plugin() {
                 Helper.broadcast("[green]自动存档完成(10分钟一次)")
             }
         }
-        timer.schedule(Config.nextSaveTime,::autoSave)
+        timer.schedule(Config.nextSaveTime, ::autoSave)
     }
 
     override fun registerServerCommands(handler: CommandHandler) {
@@ -36,6 +37,15 @@ class Main : Plugin() {
 
     override fun registerClientCommands(handler: CommandHandler) {
         ClientCommander.register(handler)
+    }
+
+    private fun hackServerControl() {
+        val obj = Core.app.listeners.find { it.javaClass.name == "ServerControl" }
+        val cls = obj.javaClass
+        //Close Internal GameOverListener
+        val field = cls.getDeclaredField("inExtraRound")
+        field.isAccessible = true
+        field.setBoolean(obj, true)
     }
 
     companion object {

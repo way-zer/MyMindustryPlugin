@@ -68,6 +68,7 @@ object Helper {
     }
 
     fun broadcast(message: String) {
+        logToConsole("[Broadcast]$message")
         Main.timer.run {
             Vars.playerGroup.all().forEach {
                 it.sendMessage(message)
@@ -82,8 +83,12 @@ object Helper {
     }
 
     fun bestMode(map: Map): Gamemode {
-        return Gamemode.bestFit(map.rules())
-//        return arrayOf(Gamemode.attack, Gamemode.pvp).firstOrNull { it.valid(map) } ?: Gamemode.survival
+        return when (map.file.name()[0]) {
+            'A' -> Gamemode.attack
+            'P' -> Gamemode.pvp
+            'S' -> Gamemode.survival
+            else -> Gamemode.bestFit(map.rules())
+        }
     }
 
     private fun resetAndLoad(callBack: () -> Unit) {
@@ -100,5 +105,10 @@ object Helper {
                 Vars.netServer.sendWorldData(it)
             }
         }
+    }
+
+    fun secureLog(tag: String, text: String) {
+        logToConsole("[yellow]$text")
+        Config.pluginLog.writeString("[$tag][${Date()}] $text")
     }
 }

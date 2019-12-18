@@ -1,7 +1,9 @@
 package cf.wayzer.mindustry
 
-import cf.wayzer.mindustry.Config.Data.playerData
+import cf.wayzer.mindustry.Data.playerData
+import io.anuke.arc.Core
 import io.anuke.arc.util.CommandHandler
+import io.anuke.mindustry.Vars
 import io.anuke.mindustry.Vars.playerGroup
 import io.anuke.mindustry.Vars.world
 import io.anuke.mindustry.game.Gamemode
@@ -9,10 +11,14 @@ import io.anuke.mindustry.io.SaveIO
 
 object ServerCommander {
     fun register(handler: CommandHandler) {
-        handler.register("mMaps", "[page]","List maps", ::onMaps)
-        handler.register("mHost", "[id] [mode]","Change map", ::onChange)
-        handler.register("mLoad", "<id>","Load save", ::onLoad)
-        handler.register("mAddExp","<playerId> <num>","Add Exp to Player", ::onAddExp)
+        handler.removeCommand("maps")
+        handler.removeCommand("host")
+        handler.removeCommand("load")
+        handler.register("maps", "[page]", "List maps", ::onMaps)
+        handler.register("host", "[id] [mode]", "Change map", ::onChange)
+        handler.register("load", "<id/name>", "Load save", ::onLoad)
+        handler.register("addExp", "<playerId> <num>", "Add Exp to Player", ::onAddExp)
+        handler.register("mAdmin", "[uuid]", "List or Toggle admin", ::onAdmin)
     }
 
     private fun onMaps(arg: Array<String>) {
@@ -21,14 +27,16 @@ object ServerCommander {
     }
 
     private fun onChange(arg: Array<String>) {
-        val map = arg.getOrNull(0)?.toIntOrNull()?.let { Config.maps[it-1] } ?: Helper.nextMap(world.map)
+        if (!Vars.net.active()) Vars.net.host(Core.settings.getInt("port"))
+        val map = arg.getOrNull(0)?.toIntOrNull()?.let { Config.maps[it - 1] } ?: Helper.nextMap(world.map)
         val mode = arg.getOrNull(1)?.let { Gamemode.valueOf(it) } ?: Helper.bestMode(map)
         Helper.loadMap(map, mode)
         Helper.logToConsole("[green]Change to {name:${map.name()} file:${map.file} author:${map.author()}} with Mode ${mode.name}")
     }
 
     private fun onLoad(arg: Array<String>) {
-        val file = arg.getOrNull(0)?.toIntOrNull()?.let { SaveIO.fileFor(it) }
+        if (!Vars.net.active()) Vars.net.host(Core.settings.getInt("port"))
+        val file = arg.getOrNull(0)?.let { Vars.saveDirectory.child("$it.${Vars.saveExtension}") }
                 ?: return Helper.logToConsole("[red]Error slot id. Can't find slot")
         if (!SaveIO.isSaveValid(file))
             return Helper.logToConsole("[red]Slot is invalid")
@@ -36,12 +44,30 @@ object ServerCommander {
         Helper.logToConsole("[green]Load slot Success.")
     }
 
-    private fun onAddExp(arg: Array<String>){
-        val player = arg.getOrNull(0)?.let {id-> playerGroup.find { it.uuid==id } }
+    private fun onAddExp(arg: Array<String>) {
+        val player = arg.getOrNull(0)?.let { id -> playerGroup.find { it.uuid == id } }
                 ?: return Helper.logToConsole("[red]Error id. Can't find player")
         val num = arg.getOrNull(1)?.toIntOrNull()
                 ?: return Helper.logToConsole("[red]Error num.")
         playerData[player.uuid] = playerData[player.uuid]!!.addExp(num)
         Helper.logToConsole("[green]Add Success.")
+    }
+
+    private fun onAdmin(arg: Array<String>) {
+        val uuid = arg.getOrNull(0)
+        if (uuid == null) {
+            Helper.logToConsole("Admins: " + Data.adminList.map {
+                val info = playerData[it] ?: return@map it
+                return@map "${info.lastName}($it)"
+            }.joinToString(" , "))
+        } else {
+            if (Data.adminList.contains(uuid)) {
+                Data.adminList.remove(uuid)
+                return Helper.logToConsole("[red]$uuid [green] has been removed from Admins[]")
+            }
+            val info = playerData[uuid] ?: return Helper.logToConsole("[red]Can't found player")
+            Data.adminList.add(uuid)
+            Helper.logToConsole("[red] ${info.lastName}($uuid) [green] has been added to Admins")
+        }
     }
 }

@@ -3,45 +3,11 @@ package cf.wayzer.mindustry
 import io.anuke.arc.collection.Array
 import io.anuke.mindustry.Vars
 import io.anuke.mindustry.maps.Map
-import org.mapdb.DBMaker
-import org.mapdb.HTreeMap
-import org.mapdb.Serializer
-import java.io.Serializable
-import java.lang.Math.pow
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Config {
-    object Data{
-        data class PlayerData(
-                val uuid:String,
-                val lastName:String,
-                val firstJoin:Date,
-                val lastJoin:Date,
-                val lastAddress:String,
-                val playedTime:Int,
-                val level:Int,
-                val exp:Int
-        ): Serializable{
-            fun getMaxExp(level:Int = this.level)=(pow(level.toDouble(),1.5)*1000).toInt()
-            fun addPlayedTime(addTime:Int)=copy(playedTime=playedTime+addTime)
-            fun addExp(addExp:Int): PlayerData {
-                var exp = this.exp+addExp
-                var level = this.level
-                while (exp>=getMaxExp(level)){
-                    exp-=getMaxExp(level)
-                    level++;
-                }
-                return copy(exp = exp,level = level)
-            }
-        }
-        val db = DBMaker.fileDB(Vars.dataDirectory.child("pluginData").file())
-                .closeOnJvmShutdown()
-                .fileMmapEnableIfSupported()
-                .make()
-        @Suppress("UNCHECKED_CAST")
-        val playerData = db.hashMap("PlayerData", Serializer.STRING_ASCII, Serializer.JAVA as Serializer<PlayerData>).createOrOpen()
-    }
+    val dataFile = Vars.dataDirectory.child("pluginData.mapdb")
     val motd = """
         |Welcome to this Server
         |[green]欢迎来到本服务器[]
@@ -61,6 +27,7 @@ object Config {
     val voteTime = TimeUnit.SECONDS.toMillis(60)
     val saveRange = 100..105 //From 100->105
     val voteSaveSolt = 111
+    val waitingTimeRound = TimeUnit.SECONDS.toMillis(10)//下一轮等待时间
     val nextSaveTime: Date
         get() {//Every 10 minutes
             val t = Calendar.getInstance()

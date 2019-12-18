@@ -13,7 +13,7 @@ object VoteHandler {
     var doing = false
         private set
     private val voted = mutableListOf<String>()
-    private var task:TimerTask?=null
+    private var task: TimerTask? = null
     var otherData: Any = ""
     fun startVote(text: String, callback: CallBack): Boolean {
         if (doing) {
@@ -30,7 +30,7 @@ object VoteHandler {
                 broadcast("[yellow]$text 投票结束,投票失败.[green]${voted.size}/${playerGroup.size()}[yellow],未超过[red]$require [yellow]人")
             }
             voted.clear()
-            task=null
+            task = null
             doing = false
         }
         return true
@@ -43,7 +43,7 @@ object VoteHandler {
         voted.add(player.uuid ?: "UNOWNED")
         player.sendMessage("[green]投票成功")
         val require = max(playerGroup.size() / 2, 1)
-        if(voted.size > require){
+        if (voted.size > require) {
             task?.cancel()
             task?.run()
         }
