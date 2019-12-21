@@ -19,8 +19,8 @@ object ClientCommander {
     fun register(handler: CommandHandler) {
         handler.removeCommand("vote")
         handler.removeCommand("votekick")
-        handler.register<Player>("votekick", "player...", "投票踢人(/vote kick <player>)") { arg, p ->
-            onVote(arrayOf("kick", arg[1]), p)
+        handler.register<Player>("votekick", "<player...>", "投票踢人(/vote kick <player>)") { arg, p ->
+            onVote(arrayOf("kick", arg[0]), p)
         }
 
         handler.register("status", "查看服务器状态", ::onStatus)
@@ -121,6 +121,9 @@ object ClientCommander {
                 val name = arg[1]
                 val target = playerGroup.find { it.name == name }
                         ?: return player.sendMessage("[red]玩家未找到")
+                if(Data.adminList.contains(player.uuid)){
+                    return onBan(arrayOf(target.uuid),player)
+                }
                 val result = VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
                     VoteHandler.otherData = ""
                     netServer.admins.banPlayer(target.uuid)
@@ -147,11 +150,13 @@ object ClientCommander {
         //Admin command
         handler.register("list", "管理指令: 列出当前所有玩家信息", ::onListPlayer)
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
+        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onListPlayer(arg: Array<String>, p: Player) {
         if (!Data.adminList.contains(p.uuid))
-            p.sendMessage("[red]你没有权限使用该命令")
+            return p.sendMessage("[red]你没有权限使用该命令")
         val text = playerGroup.all().map {
             "${it.name}[]:([red]${it.uuid.subSequence(0, 3)}[])"
         }.joinToString(" , ")
@@ -160,27 +165,35 @@ object ClientCommander {
 
     private fun onBan(arg: Array<String>, p: Player) {
         if (!Data.adminList.contains(p.uuid))
-            p.sendMessage("[red]你没有权限使用该命令")
+            return p.sendMessage("[red]你没有权限使用该命令")
         val uuid = arg.getOrNull(0)
         if (uuid == null) {
-            Helper.logToConsole("Bans: " + netServer.admins.banned.map {
+            p.sendMessage("Bans: " + netServer.admins.banned.map {
                 return@map "[white]${it.lastName}[]([red]${it.id.subSequence(0, 3)}[])"
             }.joinToString(" , "))
         } else {
             netServer.admins.banned.forEach {
                 if (it.id.startsWith(uuid)) {
                     netServer.admins.unbanPlayerID(it.id)
-                    Helper.secureLog("UnBan", "${p.name} unBan ${it.lastName}")
+                    Helper.secureLog("UnBan", "${p.name} unBan ${it.lastName}(${it.id})")
                     return p.sendMessage("[green]解Ban成功 ${it.lastName}")
                 }
             }
             playerGroup.find { it.uuid.startsWith(uuid) }?.let {
                 netServer.admins.banPlayerID(it.uuid)
                 Helper.broadcast("[red] 管理员禁封了${it.name}")
-                Helper.secureLog("Ban", "${p.name} Ban ${it.name}")
+                Helper.secureLog("Ban", "${p.name} Ban ${it.name}(${it.uuid})")
                 return p.sendMessage("[green]Ban成功 ${it.name}")
             }
             p.sendMessage("[red]找不到改用户,请确定三位字母id输入正确! /list 或 /ban 查看")
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onReloadMaps(arg: Array<String>, p: Player) {
+        if (!Data.adminList.contains(p.uuid))
+            return p.sendMessage("[red]你没有权限使用该命令")
+        Vars.maps.reload()
+        p.sendMessage("[green]地图重载成功!")
     }
 }

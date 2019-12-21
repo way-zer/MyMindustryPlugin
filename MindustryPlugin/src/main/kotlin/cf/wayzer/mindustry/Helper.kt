@@ -24,7 +24,9 @@ object Helper {
 
     fun loadSave(file: FileHandle) {
         resetAndLoad {
+            Vars.logic.reset()
             SaveIO.load(file)
+            Vars.logic.play()
         }
     }
 

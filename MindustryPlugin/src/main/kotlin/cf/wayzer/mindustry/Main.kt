@@ -40,7 +40,7 @@ class Main : Plugin() {
     }
 
     private fun hackServerControl() {
-        val obj = Core.app.listeners.find { it.javaClass.name == "ServerControl" }
+        val obj = Core.app.listeners.find { it.javaClass.simpleName == "ServerControl" }
         val cls = obj.javaClass
         //Close Internal GameOverListener
         val field = cls.getDeclaredField("inExtraRound")
