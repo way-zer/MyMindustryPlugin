@@ -41,7 +41,7 @@ object Listener {
             }
         }
         Events.on(EventType.PlayerBanEvent::class.java){e->
-            e.player.con?.kick("[red]你已被服务器禁封")
+            e.player?.con?.kick("[red]你已被服务器禁封")
         }
     }
 
