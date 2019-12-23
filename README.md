@@ -11,23 +11,23 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 6. 开源,可直接修改配置(配置在[Config.kt](https://github.com/way-zer/MyMindustryPlugin/blob/master/MindustryPlugin/src/main/kotlin/cf/wayzer/mindustry/Config.kt)文件中)
 
 ### 指令
-玩家指令:
+#### 玩家指令:
 - /status 查看服务器当前状态
 - /info 查看当前个人信息
 - /votekick <player...>(原版指令,导向/vote kick <player...>)
 - /maps 查看服务器地图
 - /slots 查看自动备份
-- /vote 各种投票功能
-  skipwave 投票跳波(10波)
-  gameover 投降
-  map <id(见/maps)> 换图
-  rollback <id(见/slots)> 回滚地图
-  kick <player...> 投票踢人(ban)(直接点Tab中的会重定向到该指令)
-管理员指令:
+- /vote 各种投票功能  
+  skipwave 投票跳波(10波)  
+  gameover 投降  
+  map <id(见/maps)> 换图  
+  rollback <id(见/slots)> 回滚地图  
+  kick <player...> 投票踢人(ban)(直接点Tab中的会重定向到该指令)  
+#### 管理员指令:
 - /list 查看服务器玩家Id列表
 - /ban [三位id] 查看已ban玩家,ban玩家(或解ban) | 三位id见/list
-- /reloadMaps 重载地图(地图上传功能请使用其他软件实现)
-后台指令:
+- /reloadMaps 重载地图(地图上传功能请使用其他软件实现)  
+#### 后台指令:
 - /maps (覆盖原版)内容与玩家基本相同
 - /load (覆盖原版)加载某个slot存档(不限于自动保存)
 - /host (覆盖原版)用法和原版基本相同
