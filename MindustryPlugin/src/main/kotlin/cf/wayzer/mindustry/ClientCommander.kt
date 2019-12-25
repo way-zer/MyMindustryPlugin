@@ -61,6 +61,9 @@ object ClientCommander {
     }
 
     private fun onVote(arg: Array<String>, player: Player) {
+        if(playerGroup.size()==1){
+            player.sendMessage("[yellow]当前服务器只有一人,若投票结束前没人加入,则一人也可通过投票(kick除外)")
+        }
         when (arg[0].toLowerCase()) {
             "map" -> {
                 if (arg.size < 2)
@@ -71,25 +74,24 @@ object ClientCommander {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
                 val map = Config.maps[id - 1]
-                VoteHandler.startVote("换图($id: [yellow]${map.name()}[])") {
+                VoteHandler.startVote("换图($id: [yellow]${map.name()}[])",true) {
                     Helper.loadMap(map)
                     Main.timer.schedule(TimeUnit.SECONDS.toMillis(5)) {
                         Helper.broadcast("[green]换图成功,当前地图[yellow]${map.name()}[green](id: $id)")
                     }
                 }
-                Core.app.post { }
             }
             "gameover" -> {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
-                VoteHandler.startVote("投降") {
+                VoteHandler.startVote("投降", true) {
                     Events.fire(EventType.GameOverEvent(Team.crux))
                 }
             }
             "skipwave" -> {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
-                VoteHandler.startVote("跳波") {
+                VoteHandler.startVote("跳波",true) {
                     for (i in 0 until 10) {
                         logic.runWave()
                         if (unitGroups[waveTeam.ordinal].size() > 300) break
@@ -108,7 +110,7 @@ object ClientCommander {
                 val voteFile = SaveIO.fileFor(Config.voteSaveSolt)
                 if (voteFile.exists()) voteFile.delete()
                 file.copyTo(voteFile)
-                VoteHandler.startVote("回档") {
+                VoteHandler.startVote("回档",true) {
                     Helper.loadSave(voteFile)
                     Main.timer.schedule(TimeUnit.SECONDS.toMillis(5)) {
                         Helper.broadcast("[green]回档成功")
@@ -126,6 +128,9 @@ object ClientCommander {
                 }
                 val result = VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
                     VoteHandler.otherData = ""
+                    if(Data.adminList.contains(target.uuid)){
+                        return@startVote Helper.broadcast("[red]错误: 目标玩家为管理员, 如有问题请与服主WayZer联系")
+                    }
                     netServer.admins.banPlayer(target.uuid)
                     Helper.secureLog("Kick", "${target.name}(${target.uuid},${target.con.address}) is kicked By ${player.name}")
                 }

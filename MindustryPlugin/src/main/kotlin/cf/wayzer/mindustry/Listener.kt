@@ -13,6 +13,8 @@ import java.util.*
 import kotlin.concurrent.schedule
 
 object Listener {
+    var lastJoin = Long.MAX_VALUE
+        private set
     private val runtime = DBMaker.memoryDB().make()
     private val joinTime = runtime.hashMap("joinTime", Serializer.STRING_ASCII, Serializer.LONG).expireAfterGet().createOrOpen()
     private val onlineExp = runtime.hashMap("onlineExp", Serializer.STRING_ASCII, Serializer.INTEGER).expireAfterGet().createOrOpen()
@@ -47,6 +49,7 @@ object Listener {
 
     private fun registerAboutPlayer() {
         Events.on(EventType.PlayerJoin::class.java) { e ->
+            lastJoin = System.currentTimeMillis()
             e.player.sendMessage(Config.motd)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(

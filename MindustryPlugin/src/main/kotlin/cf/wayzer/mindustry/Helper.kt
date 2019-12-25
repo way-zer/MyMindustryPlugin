@@ -81,7 +81,8 @@ object Helper {
     fun nextMap(map: Map? = null): Map {
         val maps = Config.maps.copy()
         maps.shuffle()
-        return maps.first { it != map } ?: maps[0]
+        return (if(Vars.playerGroup.size()<3) maps.filter { bestMode(it)!=Gamemode.pvp} else maps)
+                .first { it != map } ?: maps[0]
     }
 
     fun bestMode(map: Map): Gamemode {
