@@ -10,6 +10,8 @@ import io.anuke.mindustry.gen.Call
 import io.anuke.mindustry.io.SaveIO
 import io.anuke.mindustry.maps.Map
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 import kotlin.math.ceil
 
 object Helper {
@@ -19,6 +21,27 @@ object Helper {
             Vars.world.loadMap(map, map.applyRules(mode))
             Vars.state.rules = Vars.world.map.applyRules(mode)
             Vars.logic.play()
+        }
+        Core.app.post {
+            when(mode){
+                Gamemode.pvp->{
+                    broadcast("[yellow]PVP保护时间,禁止直接偷家(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
+                    Vars.state.rules.apply {
+                        playerDamageMultiplier = 0.0000f
+                        playerHealthMultiplier = 0.0001f
+                    }
+                    Main.timer.schedule(Config.pvpProtectTime){
+                        if(Vars.world.map != map)return@schedule
+                        broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
+                        Vars.state.rules.apply {
+                            playerDamageMultiplier = 1f
+                            playerHealthMultiplier = 1f
+                        }
+                        Vars.state.rules = map.rules(Vars.state.rules)
+                    }
+                }
+                else->return@post
+            }
         }
     }
 

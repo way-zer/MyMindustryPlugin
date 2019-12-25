@@ -25,8 +25,10 @@ object Config {
         """.trimMargin()
     val pluginLog = Vars.dataDirectory.child("logs").child("PluginLog.log")
     val voteTime = TimeUnit.SECONDS.toMillis(60)
+    val skipWaveInterval = TimeUnit.SECONDS.toMillis(10)
     val saveRange = 100..105 //From 100->105
     val voteSaveSolt = 111
+    val pvpProtectTime = TimeUnit.MINUTES.toMillis(10)
     val waitingTimeRound = TimeUnit.SECONDS.toMillis(10)//下一轮等待时间
     val nextSaveTime: Date
         get() {//Every 10 minutes

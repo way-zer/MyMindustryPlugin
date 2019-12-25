@@ -92,9 +92,11 @@ object ClientCommander {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
                 VoteHandler.startVote("跳波",true) {
-                    for (i in 0 until 10) {
+                    var i = 0
+                    Main.timer.schedule(0,Config.skipWaveInterval){
+                        if (state.gameOver||unitGroups[waveTeam.ordinal].size() > 300 || i >=10)cancel()
+                        i++
                         logic.runWave()
-                        if (unitGroups[waveTeam.ordinal].size() > 300) break
                     }
                 }
             }
