@@ -12,6 +12,7 @@ import io.anuke.mindustry.game.EventType
 import io.anuke.mindustry.game.Team
 import io.anuke.mindustry.gen.Call
 import io.anuke.mindustry.io.SaveIO
+import io.anuke.mindustry.world.blocks.storage.CoreBlock
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -84,7 +85,13 @@ object ClientCommander {
             "gameover" -> {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
-                VoteHandler.startVote("投降", true) {
+                if(state.rules.pvp){
+                    if(state.teams.isActive(player.team)|| state.teams.get(player.team)!!.cores.isEmpty)
+                        return player.sendMessage("[red]队伍已输,无需投降")
+                    else VoteHandler.startVote("投降(${player.name}[]|${player.team.name}队)"){
+                        state.teams.get(player.team).cores.forEach { it.ent<CoreBlock.CoreEntity>().kill() }
+                    }
+                }else VoteHandler.startVote("投降", true) {
                     Events.fire(EventType.GameOverEvent(Team.crux))
                 }
             }
@@ -128,6 +135,8 @@ object ClientCommander {
                 if(Data.adminList.contains(player.uuid)){
                     return onBan(arrayOf(target.uuid),player)
                 }
+                if(state.rules.pvp && player.team != target.team)
+                    return player.sendMessage("[red]PVP模式禁止踢出其他队玩家")
                 val result = VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
                     VoteHandler.otherData = ""
                     if(Data.adminList.contains(target.uuid)){

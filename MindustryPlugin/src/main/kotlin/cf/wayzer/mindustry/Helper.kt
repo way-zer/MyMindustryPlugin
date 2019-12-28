@@ -5,7 +5,9 @@ import io.anuke.arc.files.FileHandle
 import io.anuke.arc.util.ColorCodes
 import io.anuke.arc.util.Log
 import io.anuke.mindustry.Vars
+import io.anuke.mindustry.entities.type.Player
 import io.anuke.mindustry.game.Gamemode
+import io.anuke.mindustry.game.Team
 import io.anuke.mindustry.gen.Call
 import io.anuke.mindustry.io.SaveIO
 import io.anuke.mindustry.maps.Map
@@ -25,10 +27,12 @@ object Helper {
         Core.app.post {
             when(mode){
                 Gamemode.pvp->{
-                    broadcast("[yellow]PVP保护时间,禁止直接偷家(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
                     Vars.state.rules.apply {
                         playerDamageMultiplier = 0.0000f
                         playerHealthMultiplier = 0.0001f
+                    }
+                    Main.timer.schedule(1000){
+                        broadcast("[yellow]PVP保护时间,禁止直接偷家(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
                     }
                     Main.timer.schedule(Config.pvpProtectTime){
                         if(Vars.world.map != map)return@schedule
@@ -127,7 +131,7 @@ object Helper {
                 if (it.con == null) return@forEach
                 it.reset()
                 if (Vars.state.rules.pvp)
-                    it.team = Vars.netServer.assignTeam(it, players.toMutableList())
+                    it.team = getTeam(it)
                 Vars.netServer.sendWorldData(it)
             }
         }
@@ -136,5 +140,11 @@ object Helper {
     fun secureLog(tag: String, text: String) {
         logToConsole("[yellow]$text")
         Config.pluginLog.writeString("[$tag][${Date()}] $text")
+    }
+
+    fun getTeam(player: Player):Team{
+        return Listener.RuntimeData.teams.getOrPut(player.uuid){
+            Vars.netServer.assignTeam(player,Vars.playerGroup.all())
+        }
     }
 }

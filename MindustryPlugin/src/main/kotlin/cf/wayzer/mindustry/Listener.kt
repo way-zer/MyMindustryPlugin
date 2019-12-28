@@ -5,8 +5,14 @@ import cf.wayzer.mindustry.Data.playerData
 import io.anuke.arc.Events
 import io.anuke.mindustry.Vars
 import io.anuke.mindustry.content.Blocks
+import io.anuke.mindustry.content.Liquids
 import io.anuke.mindustry.game.EventType
+import io.anuke.mindustry.game.Team
+import io.anuke.mindustry.game.Teams
 import io.anuke.mindustry.gen.Call
+import io.anuke.mindustry.net.ValidateException
+import io.anuke.mindustry.type.Liquid
+import io.anuke.mindustry.world.blocks.power.NuclearReactor
 import org.mapdb.DBMaker
 import org.mapdb.Serializer
 import java.util.*
@@ -18,6 +24,29 @@ object Listener {
     private val runtime = DBMaker.memoryDB().make()
     private val joinTime = runtime.hashMap("joinTime", Serializer.STRING_ASCII, Serializer.LONG).expireAfterGet().createOrOpen()
     private val onlineExp = runtime.hashMap("onlineExp", Serializer.STRING_ASCII, Serializer.INTEGER).expireAfterGet().createOrOpen()
+    // Data for one play(map)
+    object RuntimeData{
+        var startTime=0L
+        val beginTime = mutableMapOf<String,Long>()
+        val gameTime = mutableMapOf<String,Int>()
+        val teams = mutableMapOf<String, Team>()
+        fun reset(){
+            startTime = System.currentTimeMillis()
+            beginTime.clear()
+            gameTime.clear()
+            teams.clear()
+            // 设置所有在场玩家时间
+            Vars.playerGroup.all().forEach {
+                beginTime[it.uuid]=System.currentTimeMillis()
+            }
+        }
+        fun calTime(){
+            beginTime.forEach { (uuid, start) ->
+                gameTime.merge(uuid,(System.currentTimeMillis()-start).toInt(),Int::plus)
+                beginTime[uuid]=System.currentTimeMillis()
+            }
+        }
+    }
     fun register() {
         registerGameControl()
         registerAboutPlayer()
@@ -41,16 +70,43 @@ object Listener {
             Main.timer.schedule(waitingTimeRound) {
                 Helper.loadMap(map)
             }
+            //TODO 结算经验 And 排行榜系统
+            RuntimeData.calTime()
+            if(Vars.state.rules.pvp){
+                //Remove loss Team
+                RuntimeData.gameTime.keys.filter { e.winner != RuntimeData.teams[it] }.forEach{
+                    RuntimeData.gameTime.remove(it)
+                }
+            }
+            val all = RuntimeData.gameTime.values.sum().toDouble()
+            val builder = StringBuilder("[yellow]贡献度排名(目前根据时间): ")
+            RuntimeData.gameTime.entries.sortedByDescending { it.value }.map { "[]"+playerData[it.key]!!.lastName+"[]([red]${it.value*100/all}%[])" }.joinTo(builder)
+            Helper.broadcast(builder.toString())
+        }
+        Events.on(EventType.WorldLoadEvent::class.java){
+            RuntimeData.reset()
         }
         Events.on(EventType.PlayerBanEvent::class.java){e->
             e.player?.con?.kick("[red]你已被服务器禁封")
         }
+        Events.on(ValidateException::class.java){e->
+            Call.onInfoMessage(e.player.con,"[red]检验异常,自动同步")
+            Call.onWorldDataBegin(e.player.con)
+            Vars.netServer.sendWorldData(e.player)
+        }
     }
 
     private fun registerAboutPlayer() {
+        Events.on(EventType.PlayerConnect::class.java){e->
+            if(Vars.state.rules.pvp)
+                e.player.team = Helper.getTeam(e.player)
+        }
         Events.on(EventType.PlayerJoin::class.java) { e ->
             lastJoin = System.currentTimeMillis()
-            e.player.sendMessage(Config.motd)
+            if (Config.motd.lines().size>10)
+                Call.onInfoMessage(e.player.con,Config.motd)
+            else
+                e.player.sendMessage(Config.motd)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(
                         e.player.uuid, "", Date(), Date(), "", 0, 0, 0
@@ -58,6 +114,7 @@ object Listener {
             }
             playerData[e.player.uuid] = data.copy(lastName = e.player.name, lastJoin = Date(), lastAddress = e.player.con.address)
             joinTime[e.player.uuid] = System.currentTimeMillis()
+            RuntimeData.beginTime[e.player.uuid] = System.currentTimeMillis()
         }
         Events.on(EventType.PlayerLeave::class.java) { e ->
             var data = playerData[e.player.uuid]!!
@@ -73,7 +130,7 @@ object Listener {
 
     private fun registerReGrief() {
         Events.on(EventType.DepositEvent::class.java) { e ->
-            if (e.tile.block() == Blocks.thoriumReactor && e.tile.block().liquidPressure < 1) {
+            if (e.tile.block() == Blocks.thoriumReactor && e.tile.ent<NuclearReactor.NuclearReactorEntity>().liquids.total() < 0.05) {
                 Helper.broadcast("[red][WARNING!][yellow]${e.player.name}正在进行危险行为(${e.tile.x},${e.tile.y})!")
                 Helper.secureLog("ThoriumReactor", "${e.player.name} uses ThoriumReactor in danger|(${e.tile.x},${e.tile.y})")
             }

@@ -7,26 +7,26 @@ import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max
 
-typealias CallBack = () -> Unit
-
 object VoteHandler {
     var doing = false
         private set
     private val voted = mutableListOf<String>()
     private var task: TimerTask? = null
     var otherData: Any = ""
-    fun startVote(text: String,justOne: Boolean =false, callback: CallBack): Boolean {
+    fun startVote(text: String,justOne: Boolean =false, callback: () -> Unit): Boolean {
+        var one = justOne
         if (doing) {
             return false
         }
         doing = true
+        if(playerGroup.size()!=1)one =false
         broadcast("[yellow]$text 投票开始,输入y同意")
         task = Main.timer.schedule(Config.voteTime) {
             val require = max(playerGroup.size() / 2, 1)
             if (voted.size > require) {
                 broadcast("[yellow]$text 投票结束,投票成功.[green]${voted.size}/${playerGroup.size()}[yellow],超过[red]$require [yellow]人")
                 callback()
-            } else if (justOne&&voted.size==1&&(Listener.lastJoin+Config.voteTime<System.currentTimeMillis())){
+            } else if (one&&voted.size==1&&(Listener.lastJoin+Config.voteTime<System.currentTimeMillis())){
                 broadcast("[yellow]$text 投票通过.")
                 callback()
             }else {
