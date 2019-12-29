@@ -131,7 +131,7 @@ object Helper {
                 if (it.con == null) return@forEach
                 it.reset()
                 if (Vars.state.rules.pvp)
-                    it.team = getTeam(it)
+                    it.team = getTeam(it,players.toMutableList())
                 Vars.netServer.sendWorldData(it)
             }
         }
@@ -142,9 +142,9 @@ object Helper {
         Config.pluginLog.writeString("[$tag][${Date()}] $text",true)
     }
 
-    fun getTeam(player: Player):Team{
+    fun getTeam(player: Player,players:Iterable<Player> = Vars.playerGroup.all()):Team{
         return Listener.RuntimeData.teams.getOrPut(player.uuid){
-            Vars.netServer.assignTeam(player,Vars.playerGroup.all())
+            Vars.netServer.assignTeam(player,players)
         }
     }
 }

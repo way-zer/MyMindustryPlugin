@@ -87,7 +87,9 @@ object Listener {
             Helper.broadcast(builder.toString())
         }
         Events.on(EventType.WorldLoadEvent::class.java){
-            RuntimeData.reset()
+            Main.timer.schedule(1000){
+                RuntimeData.reset()
+            }
         }
         Events.on(EventType.PlayerBanEvent::class.java){e->
             e.player?.con?.kick("[red]你已被服务器禁封")
