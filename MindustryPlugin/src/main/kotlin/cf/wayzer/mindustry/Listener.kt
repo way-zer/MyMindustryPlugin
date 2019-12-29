@@ -5,13 +5,10 @@ import cf.wayzer.mindustry.Data.playerData
 import io.anuke.arc.Events
 import io.anuke.mindustry.Vars
 import io.anuke.mindustry.content.Blocks
-import io.anuke.mindustry.content.Liquids
 import io.anuke.mindustry.game.EventType
 import io.anuke.mindustry.game.Team
-import io.anuke.mindustry.game.Teams
 import io.anuke.mindustry.gen.Call
 import io.anuke.mindustry.net.ValidateException
-import io.anuke.mindustry.type.Liquid
 import io.anuke.mindustry.world.blocks.power.NuclearReactor
 import org.mapdb.DBMaker
 import org.mapdb.Serializer
@@ -72,6 +69,9 @@ object Listener {
             }
             //TODO 结算经验 And 排行榜系统
             RuntimeData.calTime()
+            RuntimeData.gameTime.filter { it.value < 5000 }.forEach{
+                RuntimeData.gameTime.remove(it.key) //Remove less than 5 second
+            }
             if(Vars.state.rules.pvp){
                 //Remove loss Team
                 RuntimeData.gameTime.keys.filter { e.winner != RuntimeData.teams[it] }.forEach{
@@ -80,7 +80,10 @@ object Listener {
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
             val builder = StringBuilder("[yellow]贡献度排名(目前根据时间): ")
-            RuntimeData.gameTime.entries.sortedByDescending { it.value }.map { "[]"+playerData[it.key]!!.lastName+"[]([red]${it.value*100/all}%[])" }.joinTo(builder)
+            RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
+                val percent = String.format("%.2f",(it.value / all*100))
+                "[]" + playerData[it.key]!!.lastName + "[]([red]$percent%[])"
+            }
             Helper.broadcast(builder.toString())
         }
         Events.on(EventType.WorldLoadEvent::class.java){
