@@ -39,6 +39,7 @@ object ClientCommander {
             |[green]服务器状态[]
             |   [green]地图: [yellow]${Vars.world.map.name()}[]
             |   [green]${(60f / Time.delta()).toInt()} FPS, ${Core.app.javaHeap / 1024 / 1024} MB used[]
+            |   [green]总单位数: ${unitGroups.map { it.size() }.sum()}
         """.trimMargin())
     }
 

@@ -135,5 +135,29 @@ object Listener {
                 Helper.secureLog("ThoriumReactor", "${e.player.name} uses ThoriumReactor in danger|(${e.tile.x},${e.tile.y})")
             }
         }
+        Events.on(EventType.BlockBuildBeginEvent::class.java){e->
+            if(e.tile.block()==Blocks.draugFactory){
+                Vars.unitGroups.size
+            }
+        }
+        Events.on(EventType.UnitCreateEvent::class.java){e->
+            if(e.unit.team == Vars.waveTeam)return@on
+            when(Vars.unitGroups[e.unit.team.ordinal].size()){
+                in Config.unitToWarn until Config.unitToStop ->
+                    Vars.playerGroup.all().forEach {
+                        if(it.team == e.unit.team){
+                            it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿")
+                        }
+                    }
+                in Config.unitToStop..10000 ->{
+                    Vars.playerGroup.all().forEach {
+                        if(it.team == e.unit.team){
+                            it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成")
+                        }
+                    }
+                    e.unit.kill()
+                }
+            }
+        }
     }
 }

@@ -28,6 +28,8 @@ object Config {
         |[green]新增贡献度排行榜
         """.trimMargin()
     val pluginLog = Vars.dataDirectory.child("logs").child("PluginLog.log")
+    val unitToWarn = 150
+    val unitToStop = 220
     val voteTime = TimeUnit.SECONDS.toMillis(60)
     val skipWaveInterval = TimeUnit.SECONDS.toMillis(10)
     val saveRange = 100..105 //From 100->105

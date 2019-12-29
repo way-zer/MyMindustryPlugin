@@ -139,7 +139,7 @@ object Helper {
 
     fun secureLog(tag: String, text: String) {
         logToConsole("[yellow]$text")
-        Config.pluginLog.writeString("[$tag][${Date()}] $text")
+        Config.pluginLog.writeString("[$tag][${Date()}] $text",true)
     }
 
     fun getTeam(player: Player):Team{
