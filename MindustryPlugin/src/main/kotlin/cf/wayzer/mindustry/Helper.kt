@@ -1,16 +1,17 @@
 package cf.wayzer.mindustry
 
-import io.anuke.arc.Core
-import io.anuke.arc.files.FileHandle
-import io.anuke.arc.util.ColorCodes
-import io.anuke.arc.util.Log
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.entities.type.Player
-import io.anuke.mindustry.game.Gamemode
-import io.anuke.mindustry.game.Team
-import io.anuke.mindustry.gen.Call
-import io.anuke.mindustry.io.SaveIO
-import io.anuke.mindustry.maps.Map
+import arc.Core
+import arc.files.Fi
+import arc.util.ColorCodes
+import arc.util.Log
+import mindustry.Vars
+import mindustry.core.NetServer
+import mindustry.entities.type.Player
+import mindustry.game.Gamemode
+import mindustry.game.Team
+import mindustry.gen.Call
+import mindustry.io.SaveIO
+import mindustry.maps.Map
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
@@ -49,7 +50,7 @@ object Helper {
         }
     }
 
-    fun loadSave(file: FileHandle) {
+    fun loadSave(file: Fi) {
         resetAndLoad {
             Vars.logic.reset()
             SaveIO.load(file)
@@ -131,7 +132,7 @@ object Helper {
                 if (it.con == null) return@forEach
                 it.reset()
                 if (Vars.state.rules.pvp)
-                    it.team = getTeam(it,players.toMutableList())
+                    it.team = Vars.netServer.assignTeam(it,players.toMutableList())
                 Vars.netServer.sendWorldData(it)
             }
         }
@@ -142,9 +143,17 @@ object Helper {
         Config.pluginLog.writeString("[$tag][${Date()}] $text",true)
     }
 
-    fun getTeam(player: Player,players:Iterable<Player> = Vars.playerGroup.all()):Team{
-        return Listener.RuntimeData.teams.getOrPut(player.uuid){
-            Vars.netServer.assignTeam(player,players)
+    fun setTeamAssigner(){
+        val old = Vars.netServer.assigner
+        if(old !is MyAssigner)
+            Vars.netServer.assigner=MyAssigner(old)
+    }
+
+    private class MyAssigner(private val old:NetServer.TeamAssigner):NetServer.TeamAssigner{
+        override fun assign(player: Player, p1: MutableIterable<Player>): Team {
+            return Listener.RuntimeData.teams.getOrPut(player.uuid){
+                old.assign(player,p1)
+            }
         }
     }
 }

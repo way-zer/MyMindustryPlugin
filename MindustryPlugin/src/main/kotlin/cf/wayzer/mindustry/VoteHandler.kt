@@ -1,8 +1,8 @@
 package cf.wayzer.mindustry
 
 import cf.wayzer.mindustry.Helper.broadcast
-import io.anuke.mindustry.Vars.playerGroup
-import io.anuke.mindustry.entities.type.Player
+import mindustry.Vars.playerGroup
+import mindustry.entities.type.Player
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max

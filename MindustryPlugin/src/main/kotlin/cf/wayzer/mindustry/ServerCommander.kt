@@ -1,13 +1,13 @@
 package cf.wayzer.mindustry
 
 import cf.wayzer.mindustry.Data.playerData
-import io.anuke.arc.Core
-import io.anuke.arc.util.CommandHandler
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.Vars.playerGroup
-import io.anuke.mindustry.Vars.world
-import io.anuke.mindustry.game.Gamemode
-import io.anuke.mindustry.io.SaveIO
+import arc.Core
+import arc.util.CommandHandler
+import mindustry.Vars
+import mindustry.Vars.playerGroup
+import mindustry.Vars.world
+import mindustry.game.Gamemode
+import mindustry.io.SaveIO
 
 object ServerCommander {
     fun register(handler: CommandHandler) {
@@ -27,7 +27,7 @@ object ServerCommander {
     }
 
     private fun onChange(arg: Array<String>) {
-        if (!Vars.net.active()) Vars.net.host(Core.settings.getInt("port"))
+        if (!Vars.net.server()) Vars.netServer.openServer()
         val map = arg.getOrNull(0)?.toIntOrNull()?.let { Config.maps[it - 1] } ?: Helper.nextMap(world.map)
         val mode = arg.getOrNull(1)?.let { Gamemode.valueOf(it) } ?: Helper.bestMode(map)
         Helper.loadMap(map, mode)
@@ -35,7 +35,7 @@ object ServerCommander {
     }
 
     private fun onLoad(arg: Array<String>) {
-        if (!Vars.net.active()) Vars.net.host(Core.settings.getInt("port"))
+        if (!Vars.net.server()) Vars.netServer.openServer()
         val file = arg.getOrNull(0)?.let { Vars.saveDirectory.child("$it.${Vars.saveExtension}") }
                 ?: return Helper.logToConsole("[red]Error slot id. Can't find slot")
         if (!SaveIO.isSaveValid(file))

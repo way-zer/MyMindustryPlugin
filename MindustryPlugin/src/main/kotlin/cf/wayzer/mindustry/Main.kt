@@ -2,12 +2,12 @@ package cf.wayzer.mindustry
 
 import cf.wayzer.libraryManager.Dependency
 import cf.wayzer.libraryManager.LibraryManager
-import io.anuke.arc.Core
-import io.anuke.arc.util.CommandHandler
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.core.GameState
-import io.anuke.mindustry.io.SaveIO
-import io.anuke.mindustry.plugin.Plugin
+import arc.Core
+import arc.util.CommandHandler
+import mindustry.Vars
+import mindustry.core.GameState
+import mindustry.io.SaveIO
+import mindustry.plugin.Plugin
 import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -17,6 +17,7 @@ class Main : Plugin() {
     override fun init() {
         Listener.register()
         hackServerControl()
+        Helper.setTeamAssigner()
         timer.schedule(Config.nextSaveTime, ::autoSave)
     }
 

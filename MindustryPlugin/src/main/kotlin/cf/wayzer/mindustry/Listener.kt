@@ -2,14 +2,14 @@ package cf.wayzer.mindustry
 
 import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
-import io.anuke.arc.Events
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.content.Blocks
-import io.anuke.mindustry.game.EventType
-import io.anuke.mindustry.game.Team
-import io.anuke.mindustry.gen.Call
-import io.anuke.mindustry.net.ValidateException
-import io.anuke.mindustry.world.blocks.power.NuclearReactor
+import arc.Events
+import mindustry.Vars
+import mindustry.content.Blocks
+import mindustry.game.EventType
+import mindustry.game.Team
+import mindustry.gen.Call
+import mindustry.net.ValidateException
+import mindustry.world.blocks.power.NuclearReactor
 import org.mapdb.DBMaker
 import org.mapdb.Serializer
 import java.util.*
@@ -102,10 +102,6 @@ object Listener {
     }
 
     private fun registerAboutPlayer() {
-        Events.on(EventType.PlayerConnect::class.java){e->
-            if(Vars.state.rules.pvp)
-                e.player.team = Helper.getTeam(e.player)
-        }
         Events.on(EventType.PlayerJoin::class.java) { e ->
             lastJoin = System.currentTimeMillis()
             if (Config.motd.lines().size>10)
@@ -140,14 +136,9 @@ object Listener {
                 Helper.secureLog("ThoriumReactor", "${e.player.name} uses ThoriumReactor in danger|(${e.tile.x},${e.tile.y})")
             }
         }
-        Events.on(EventType.BlockBuildBeginEvent::class.java){e->
-            if(e.tile.block()==Blocks.draugFactory){
-                Vars.unitGroups.size
-            }
-        }
         Events.on(EventType.UnitCreateEvent::class.java){e->
-            if(e.unit.team == Vars.waveTeam)return@on
-            when(Vars.unitGroups[e.unit.team.ordinal].size()){
+            if(e.unit.team == Vars.state.rules.waveTeam)return@on
+            when(Vars.unitGroup.count { it.team == e.unit.team }){
                 in Config.unitToWarn until Config.unitToStop ->
                     Vars.playerGroup.all().forEach {
                         if(it.team == e.unit.team){

@@ -1,18 +1,18 @@
 package cf.wayzer.mindustry
 
 import cf.wayzer.mindustry.Data.playerData
-import io.anuke.arc.Core
-import io.anuke.arc.Events
-import io.anuke.arc.util.CommandHandler
-import io.anuke.arc.util.Time
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.Vars.*
-import io.anuke.mindustry.entities.type.Player
-import io.anuke.mindustry.game.EventType
-import io.anuke.mindustry.game.Team
-import io.anuke.mindustry.gen.Call
-import io.anuke.mindustry.io.SaveIO
-import io.anuke.mindustry.world.blocks.storage.CoreBlock
+import arc.Core
+import arc.Events
+import arc.util.CommandHandler
+import arc.util.Time
+import mindustry.Vars
+import mindustry.Vars.*
+import mindustry.entities.type.Player
+import mindustry.game.EventType
+import mindustry.game.Team
+import mindustry.gen.Call
+import mindustry.io.SaveIO
+import mindustry.world.blocks.storage.CoreBlock
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -39,7 +39,7 @@ object ClientCommander {
             |[green]服务器状态[]
             |   [green]地图: [yellow]${Vars.world.map.name()}[]
             |   [green]${(60f / Time.delta()).toInt()} FPS, ${Core.app.javaHeap / 1024 / 1024} MB used[]
-            |   [green]总单位数: ${unitGroups.map { it.size() }.sum()}
+            |   [green]总单位数: ${unitGroup.size()}
         """.trimMargin())
     }
 
@@ -90,7 +90,7 @@ object ClientCommander {
                     if(state.teams.isActive(player.team)|| state.teams.get(player.team)!!.cores.isEmpty)
                         return player.sendMessage("[red]队伍已输,无需投降")
                     else VoteHandler.startVote("投降(${player.name}[]|${player.team.name}队)"){
-                        state.teams.get(player.team).cores.forEach { it.ent<CoreBlock.CoreEntity>().kill() }
+                        state.teams.get(player.team).cores.forEach { it.kill() }
                     }
                 }else VoteHandler.startVote("投降", true) {
                     Events.fire(EventType.GameOverEvent(Team.crux))
@@ -102,7 +102,7 @@ object ClientCommander {
                 VoteHandler.startVote("跳波",true) {
                     var i = 0
                     Main.timer.schedule(0,Config.skipWaveInterval){
-                        if (state.gameOver||unitGroups[waveTeam.ordinal].size() > 300 || i >=10)cancel()
+                        if (state.gameOver|| state.enemies > 300 || i >=10)cancel()
                         i++
                         logic.runWave()
                     }

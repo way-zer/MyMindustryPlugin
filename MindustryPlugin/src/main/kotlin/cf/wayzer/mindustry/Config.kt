@@ -1,8 +1,8 @@
 package cf.wayzer.mindustry
 
-import io.anuke.arc.collection.Array
-import io.anuke.mindustry.Vars
-import io.anuke.mindustry.maps.Map
+import arc.struct.Array
+import mindustry.Vars
+import mindustry.maps.Map
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -46,7 +46,7 @@ object Config {
         }
     val maps: Array<Map>
         get() {
-            return Vars.maps.customMaps()
+            return Vars.maps.customMaps()!!
         }
 }
 
