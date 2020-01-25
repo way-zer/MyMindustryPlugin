@@ -1,18 +1,18 @@
 package cf.wayzer.mindustry
 
-import cf.wayzer.mindustry.Data.playerData
 import arc.Core
 import arc.Events
 import arc.util.CommandHandler
 import arc.util.Time
+import cf.wayzer.mindustry.Data.playerData
 import mindustry.Vars
 import mindustry.Vars.*
 import mindustry.entities.type.Player
 import mindustry.game.EventType
+import mindustry.game.Gamemode
 import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.io.SaveIO
-import mindustry.world.blocks.storage.CoreBlock
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -26,7 +26,7 @@ object ClientCommander {
 
         handler.register("status", "查看服务器状态", ::onStatus)
         handler.register("info", "查看个人信息", ::onInfo)
-        handler.register("maps", "[page]", "查看服务器地图", ::onMaps)
+        handler.register("maps", "[page/pvp/attack/all] [page]", "查看服务器地图", ::onMaps)
         handler.register("slots", "查看自动存档") { _, p: Player -> p.sendMessage(Helper.listBackup()) }
         handler.register("vote", "<map/gameOver/kick/skipWave/rollback> [params...]",
                 "进行投票:换图/投降/踢人/跳波/回滚", ::onVote)
@@ -158,9 +158,19 @@ object ClientCommander {
         }
     }
 
+    @Suppress("DuplicatedCode")
     private fun onMaps(arg: Array<String>, player: Player) {
-        val page = arg.getOrNull(0)?.toIntOrNull() ?: 1
-        player.sendMessage(Helper.listMap(page))
+        val mode:Gamemode? = arg.getOrNull(0).let {
+            when {
+                "pvp".equals(it,true) -> Gamemode.pvp
+                "attack".equals(it,true) -> Gamemode.attack
+                "all".equals(it,true) -> null
+                else -> Gamemode.survival
+            }
+        }
+        val page = arg.lastOrNull()?.toIntOrNull() ?: 1
+        player.sendMessage("[yellow]默认只显示所有生存图,输入[green]/maps pvp[yellow]显示pvp图,[green]/maps attack[yellow]显示攻城图[green]/maps all[yellow]显示所有")
+        player.sendMessage(Helper.listMap(page,mode))
     }
 
     private fun registerAdmin(handler: CommandHandler) {

@@ -12,6 +12,7 @@ object VoteHandler {
         private set
     private val voted = mutableListOf<String>()
     private var task: TimerTask? = null
+    var welcomeMessage = ""
     var otherData: Any = ""
     fun startVote(text: String,justOne: Boolean =false, callback: () -> Unit): Boolean {
         var one = justOne
@@ -21,6 +22,7 @@ object VoteHandler {
         doing = true
         if(playerGroup.size()!=1)one =false
         broadcast("[yellow]$text 投票开始,输入y同意")
+        welcomeMessage = "[yellow]当前正在进行$text 投票，输入y同意"
         task = Main.timer.schedule(Config.voteTime) {
             val require = max(playerGroup.size() / 2, 1)
             if (voted.size > require) {
@@ -50,6 +52,11 @@ object VoteHandler {
             task?.cancel()
             task?.run()
         }
+    }
+
+    fun handleJoin(player: Player){
+        if(!doing)return
+        player.sendMessage(welcomeMessage)
     }
 
     fun cancelVote(){

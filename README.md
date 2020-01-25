@@ -1,6 +1,6 @@
 # Mindustry 服务器基础管理插件
 Essitial plugin for Mindustry (now only Chinese,need English version open an issue).  
-当前使用在我自己服务器 vps.way:smile:zer.cf
+当前使用在我自己服务器 m.tiny:smile:lake.tk
 
 ## 功能介绍
 1. 重写默认换图机制(可以根据文件名首字母确定模式 S生存P对抗A攻击)

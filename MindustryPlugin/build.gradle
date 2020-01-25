@@ -4,9 +4,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.41'
 }
 group 'cf.wayzer'
-version '1.1.1'
+version '1.1.2'
 ext{
-    mindistryVersion = "v102"
+    mindistryVersion = "v103"
 //    mindistryVersion = "-SNAPSHOT"
     mapdbVersion = "3.0.7"
 }

@@ -71,17 +71,18 @@ object Helper {
         return text.toString()
     }
 
-    fun listMap(p: Int): String {
-        val maps = Config.maps
+    fun listMap(p: Int,mode: Gamemode?= Gamemode.survival): String {
+        val maps = Config.maps.mapIndexed{index, map -> (index+1) to map }
+                .filter { mode==null||bestMode(it.second)==mode }
         val totalPage = ceil(maps.size / 7f).toInt()
         var page = p
         if (page < 1) page = 1
         if (page > totalPage) page = totalPage
         val text = StringBuilder()
         text.append("[green]===[white] 服务器地图 [green]===\n")
-        maps.forEachIndexed { index, map ->
+        maps.forEachIndexed { index, pair ->//pair: id,map
             if (index in 7 * (page - 1) until 7 * page) {
-                text.append("  [red]${index + 1}[]:[yellow]${map.file.file().nameWithoutExtension}[] | [yellow]${map.name()}[]\n")
+                text.append("  [red]${pair.first}[]:[yellow]${pair.second.file.file().nameWithoutExtension}[] | [yellow]${pair.second.name()}[]\n")
             }
         }
         text.append("[green]===[white] $page/$totalPage [green]===")
@@ -106,11 +107,10 @@ object Helper {
         }
     }
 
-    fun nextMap(map: Map? = null): Map {
+    fun nextMap(map: Map? = null,mode: Gamemode = Gamemode.survival): Map {
         val maps = Config.maps.copy()
         maps.shuffle()
-        return (if(Vars.playerGroup.size()<3) maps.filter { bestMode(it)!=Gamemode.pvp} else maps)
-                .first { it != map } ?: maps[0]
+        return  maps.filter { bestMode(it)==mode}.first { it != map } ?: maps[0]
     }
 
     fun bestMode(map: Map): Gamemode {
@@ -127,6 +127,7 @@ object Helper {
             val players = Vars.playerGroup.all().copy()
             players.forEach { it.dead = true }
             callBack()
+            Listener.RuntimeData.reset()
             Call.onWorldDataBegin()
             players.forEach {
                 if (it.con == null) return@forEach

@@ -1,14 +1,14 @@
 package cf.wayzer.mindustry
 
-import cf.wayzer.libraryManager.Dependency
-import cf.wayzer.libraryManager.LibraryManager
 import arc.Core
 import arc.util.CommandHandler
+import cf.wayzer.libraryManager.Dependency
+import cf.wayzer.libraryManager.LibraryManager
 import mindustry.Vars
 import mindustry.core.GameState
 import mindustry.io.SaveIO
 import mindustry.plugin.Plugin
-import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
@@ -54,7 +54,7 @@ class Main : Plugin() {
         val timer = Timer(true)
 
         init {
-            LibraryManager(Path.of("./libs")).apply {
+            LibraryManager(Paths.get("libs")).apply {
                 addJCenter()
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"))
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion"))

@@ -1,8 +1,8 @@
 package cf.wayzer.mindustry
 
+import arc.Events
 import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
-import arc.Events
 import mindustry.Vars
 import mindustry.content.Blocks
 import mindustry.game.EventType
@@ -79,25 +79,22 @@ object Listener {
                 }
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
-            val builder = StringBuilder("[yellow]贡献度排名(目前根据时间): ")
+            val builder = StringBuilder()
+            builder.append("[yellow]总贡献时长: "+all/1000/60+"分钟")
+            builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
                 val percent = String.format("%.2f",(it.value / all*100))
                 "[]" + playerData[it.key]!!.lastName + "[]([red]$percent%[])"
             }
             Helper.broadcast(builder.toString())
         }
-        Events.on(EventType.WorldLoadEvent::class.java){
-            Main.timer.schedule(1000){
-                RuntimeData.reset()
-            }
-        }
         Events.on(EventType.PlayerBanEvent::class.java){e->
             e.player?.con?.kick("[red]你已被服务器禁封")
         }
         Events.on(ValidateException::class.java){e->
-            Call.onInfoMessage(e.player.con,"[red]检验异常,自动同步")
             Call.onWorldDataBegin(e.player.con)
             Vars.netServer.sendWorldData(e.player)
+            e.player.sendMessage("[red]检验异常,自动同步")
         }
     }
 
@@ -108,6 +105,7 @@ object Listener {
                 Call.onInfoMessage(e.player.con,Config.motd)
             else
                 e.player.sendMessage(Config.motd)
+            VoteHandler.handleJoin(e.player)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(
                         e.player.uuid, "", Date(), Date(), "", 0, 0, 0
@@ -122,6 +120,8 @@ object Listener {
             data = data.addPlayedTime(((System.currentTimeMillis() - joinTime[e.player.uuid]!!) / 1000).toInt())
             onlineExp[e.player.uuid]?.let { data = data.addExp(it) }
             playerData[e.player.uuid] = data
+            RuntimeData.calTime()
+            RuntimeData.beginTime.remove(e.player.uuid)
         }
         Events.on(EventType.PlayerChatEvent::class.java) { e ->
             if (e.message.equals("y", true))

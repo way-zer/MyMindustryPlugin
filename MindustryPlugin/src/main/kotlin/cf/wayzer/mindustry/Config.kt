@@ -1,5 +1,6 @@
 package cf.wayzer.mindustry
 
+import arc.files.Fi
 import arc.struct.Array
 import mindustry.Vars
 import mindustry.maps.Map
@@ -7,7 +8,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Config {
-    val dataFile = Vars.dataDirectory.child("pluginData.mapdb")
+    val dataFile: Fi = Vars.dataDirectory.child("pluginData.mapdb")
     val motd = """
         |Welcome to this Server
         |[green]欢迎来到本服务器[]
@@ -23,9 +24,8 @@ object Config {
         |    [green]/vote gameOver[] 投票投降
         |    [green]/vote rollback[] 投票回滚(10分钟自动保存)
         |    [green]/vote skipWave[] 投票快进跳波
-        |[yellow]----===最新消息(12.29更新)===----
-        |[green]优化PVP队伍机制
-        |[green]新增贡献度排行榜
+        |[yellow]----===最新消息(1.25更新)===----
+        |[green]现在默认只有生存模式，其他模式地图请投票选择
         """.trimMargin()
     val pluginLog = Vars.dataDirectory.child("logs").child("PluginLog.log")
     val unitToWarn = 150

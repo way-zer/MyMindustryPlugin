@@ -1,8 +1,7 @@
 package cf.wayzer.mindustry
 
-import cf.wayzer.mindustry.Data.playerData
-import arc.Core
 import arc.util.CommandHandler
+import cf.wayzer.mindustry.Data.playerData
 import mindustry.Vars
 import mindustry.Vars.playerGroup
 import mindustry.Vars.world
@@ -14,16 +13,25 @@ object ServerCommander {
         handler.removeCommand("maps")
         handler.removeCommand("host")
         handler.removeCommand("load")
-        handler.register("maps", "[page]", "List maps", ::onMaps)
+        handler.register("maps", "[all/pvp/attack/page] [page]", "List maps", ::onMaps)
         handler.register("host", "[id] [mode]", "Change map", ::onChange)
         handler.register("load", "<id/name>", "Load save", ::onLoad)
         handler.register("addExp", "<playerId> <num>", "Add Exp to Player", ::onAddExp)
         handler.register("mAdmin", "[uuid]", "List or Toggle admin", ::onAdmin)
     }
 
+    @Suppress("DuplicatedCode")
     private fun onMaps(arg: Array<String>) {
-        val page = arg.getOrNull(0)?.toIntOrNull() ?: 1
-        Helper.logToConsole(Helper.listMap(page))
+        val mode:Gamemode? = arg.getOrNull(0).let {
+            when {
+                "pvp".equals(it,true) -> Gamemode.pvp
+                "attack".equals(it,true) -> Gamemode.attack
+                "all".equals(it,true) -> null
+                else -> Gamemode.survival
+            }
+        }
+        val page = arg.lastOrNull()?.toIntOrNull() ?: 1
+        Helper.logToConsole(Helper.listMap(page,mode))
     }
 
     private fun onChange(arg: Array<String>) {
