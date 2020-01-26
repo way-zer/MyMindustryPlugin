@@ -87,9 +87,9 @@ object ClientCommander {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中")
                 if(state.rules.pvp){
-                    if(state.teams.isActive(player.team)|| state.teams.get(player.team)!!.cores.isEmpty)
+                    if(!state.teams.isActive(player.team)|| state.teams.get(player.team)!!.cores.isEmpty)
                         return player.sendMessage("[red]队伍已输,无需投降")
-                    else VoteHandler.startVote("投降(${player.name}[]|${player.team.name}队)"){
+                    else VoteHandler.startVote("投降(${player.name}[]|[#${player.team.color}]${player.team.name}[yellow]队)"){
                         state.teams.get(player.team).cores.forEach { it.kill() }
                     }
                 }else VoteHandler.startVote("投降", true) {

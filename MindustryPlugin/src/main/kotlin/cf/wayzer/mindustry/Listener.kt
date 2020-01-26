@@ -1,10 +1,12 @@
 package cf.wayzer.mindustry
 
+import arc.Core
 import arc.Events
 import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
 import mindustry.Vars
 import mindustry.content.Blocks
+import mindustry.entities.type.Player
 import mindustry.game.EventType
 import mindustry.game.Team
 import mindustry.gen.Call
@@ -27,13 +29,13 @@ object Listener {
         val beginTime = mutableMapOf<String,Long>()
         val gameTime = mutableMapOf<String,Int>()
         val teams = mutableMapOf<String, Team>()
-        fun reset(){
+        fun reset(players: Iterable<Player> = Vars.playerGroup.all()){
             startTime = System.currentTimeMillis()
             beginTime.clear()
             gameTime.clear()
             teams.clear()
             // 设置所有在场玩家时间
-            Vars.playerGroup.all().forEach {
+            players.forEach {
                 beginTime[it.uuid]=System.currentTimeMillis()
             }
         }
@@ -80,7 +82,7 @@ object Listener {
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
             val builder = StringBuilder()
-            builder.append("[yellow]总贡献时长: "+all/1000/60+"分钟")
+            builder.append("[yellow]总贡献时长: "+all/1000/60+"分钟\n")
             builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
                 val percent = String.format("%.2f",(it.value / all*100))
@@ -125,7 +127,9 @@ object Listener {
         }
         Events.on(EventType.PlayerChatEvent::class.java) { e ->
             if (e.message.equals("y", true))
-                VoteHandler.handleVote(e.player)
+                Core.app.post {
+                    VoteHandler.handleVote(e.player)
+                }
         }
     }
 

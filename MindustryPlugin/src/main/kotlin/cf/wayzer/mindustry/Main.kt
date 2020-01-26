@@ -25,8 +25,9 @@ class Main : Plugin() {
         if (Vars.state.`is`(GameState.State.playing)) {
             val minute = ((that.scheduledExecutionTime() / TimeUnit.MINUTES.toMillis(1)) % 60).toInt() //Get the minute
             Core.app.post {
-                SaveIO.save(SaveIO.fileFor(Config.saveRange.first + minute / 10))
-                Helper.broadcast("[green]自动存档完成(10分钟一次)")
+                val id = Config.saveRange.first + minute / 10
+                SaveIO.save(SaveIO.fileFor(id))
+                Helper.broadcast("[green]自动存档完成(10分钟一次),存档号 [red]$id")
             }
         }
         timer.schedule(Config.nextSaveTime, ::autoSave)

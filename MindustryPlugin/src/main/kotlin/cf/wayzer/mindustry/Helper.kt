@@ -99,8 +99,8 @@ object Helper {
     }
 
     fun broadcast(message: String) {
-        logToConsole("[Broadcast]$message")
         Main.timer.run {
+            logToConsole("[Broadcast]$message")
             Vars.playerGroup.all().forEach {
                 it.sendMessage(message)
             }
@@ -124,16 +124,16 @@ object Helper {
 
     private fun resetAndLoad(callBack: () -> Unit) {
         Core.app.post {
-            val players = Vars.playerGroup.all().copy()
+            val players = Vars.playerGroup.all().toList()
             players.forEach { it.dead = true }
             callBack()
-            Listener.RuntimeData.reset()
+            Listener.RuntimeData.reset(players)
             Call.onWorldDataBegin()
             players.forEach {
                 if (it.con == null) return@forEach
                 it.reset()
                 if (Vars.state.rules.pvp)
-                    it.team = Vars.netServer.assignTeam(it,players.toMutableList())
+                    it.team = Vars.netServer.assignTeam(it,players)
                 Vars.netServer.sendWorldData(it)
             }
         }
@@ -152,8 +152,12 @@ object Helper {
 
     private class MyAssigner(private val old:NetServer.TeamAssigner):NetServer.TeamAssigner{
         override fun assign(player: Player, p1: MutableIterable<Player>): Team {
+            if (!Vars.state.rules.pvp)return Vars.state.rules.defaultTeam;
             return Listener.RuntimeData.teams.getOrPut(player.uuid){
-                old.assign(player,p1)
+                //not use old,because it may assign to team without core
+                val teams = Vars.state.teams.active.filter { it.hasCore() }
+                teams.shuffled()
+                teams.minBy { p1.count { p-> p.team==it.team&&player!=p } }!!.team
             }
         }
     }
