@@ -4,11 +4,15 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 
 ## 功能介绍
 1. 重写默认换图机制(可以根据文件名首字母确定模式 S生存P对抗A攻击)
-2. 完整投票功能
+2. 完整投票功能(跳波,换图,踢人,投降,回滚)
 3. 每10分钟自动保存(整10, xx:00保存为100,xx:50保存为105)
 4. 额外的管理员系统(可以执行管理员指令,vote kick立即执行)
 5. 进服欢迎信息(目前为硬编码,如需修改,请修改源码并手动编译)
 6. 开源,可直接修改配置(配置在[Config.kt](https://github.com/way-zer/MyMindustryPlugin/blob/master/MindustryPlugin/src/main/kotlin/cf/wayzer/mindustry/Config.kt)文件中)
+7. PVP辅助(PVP保护时间;防止重进换队等)
+8. 贡献榜(一局结算一次,目前根据时间贡献,有更好的请联系我)
+9. 限制每队单位数量(兵和无人机,防卡服)
+10. 部分功能见下方指令说明
 
 ### 指令
 #### 玩家指令:
@@ -26,7 +30,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 #### 管理员指令:
 - /list 查看服务器玩家Id列表
 - /ban [三位id] 查看已ban玩家,ban玩家(或解ban) | 三位id见/list
-- /reloadMaps 重载地图(地图上传功能请使用其他软件实现)  
+- ~~/reloadMaps 重载地图(地图上传功能请使用其他软件实现)  ~~(在需要时自动reload)
 #### 后台指令:
 - /maps (覆盖原版)内容与玩家基本相同
 - /load (覆盖原版)加载某个slot存档(不限于自动保存)
@@ -42,6 +46,13 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 ## 安装方式
 在Relase中下载最新jar,放置在config/mods下即可
 > 注意: 第一次启动会下载依赖库,网络不好可能会耗费较长时间,且需要多次尝试(下载成功后会自动缓存)
+### 自行编译
+```shell
+cd MindustryPlugin
+.\gradlew shadowJar
+cd build\libs
+ls #可以看到生成的jar文件
+```
 
 ## 关于授权(License)
 目前保留权限,只允许个人修改及使用,不允许他人分发

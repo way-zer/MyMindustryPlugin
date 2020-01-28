@@ -4,6 +4,7 @@ import arc.Core
 import arc.files.Fi
 import arc.util.ColorCodes
 import arc.util.Log
+import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
 import mindustry.core.NetServer
 import mindustry.entities.type.Player
@@ -14,36 +15,29 @@ import mindustry.io.SaveIO
 import mindustry.maps.Map
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.schedule
 import kotlin.math.ceil
 
 object Helper {
     fun loadMap(map: Map = nextMap(), mode: Gamemode = bestMode(map)) {
         resetAndLoad {
-            Vars.logic.reset()
             Vars.world.loadMap(map, map.applyRules(mode))
             Vars.state.rules = Vars.world.map.applyRules(mode)
             Vars.logic.play()
         }
-        Core.app.post {
+        Core.app.post {//After reset And Load
             when(mode){
                 Gamemode.pvp->{
-                    Vars.state.rules.apply {
-                        playerDamageMultiplier = 0.0000f
-                        playerHealthMultiplier = 0.0001f
-                    }
-                    Main.timer.schedule(1000){
-                        broadcast("[yellow]PVP保护时间,禁止直接偷家(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
-                    }
-                    Main.timer.schedule(Config.pvpProtectTime){
-                        if(Vars.world.map != map)return@schedule
+                    Listener.RuntimeData.protectDownTime= DownTime(Main.timer,Config.pvpProtectTime,{
+                        Listener.RuntimeData.pvpProtect=true
+                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
+                    },{
+                        if(Vars.world.map != map) return@DownTime false
+                        Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟",10f)
+                        return@DownTime true
+                    },{
+                        Listener.RuntimeData.pvpProtect=false
                         broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
-                        Vars.state.rules.apply {
-                            playerDamageMultiplier = 1f
-                            playerHealthMultiplier = 1f
-                        }
-                        Vars.state.rules = map.rules(Vars.state.rules)
-                    }
+                    })
                 }
                 else->return@post
             }
@@ -52,7 +46,6 @@ object Helper {
 
     fun loadSave(file: Fi) {
         resetAndLoad {
-            Vars.logic.reset()
             SaveIO.load(file)
             Vars.logic.play()
         }

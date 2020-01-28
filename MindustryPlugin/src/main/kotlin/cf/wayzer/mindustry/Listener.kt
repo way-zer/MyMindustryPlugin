@@ -4,12 +4,14 @@ import arc.Core
 import arc.Events
 import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
+import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
 import mindustry.content.Blocks
 import mindustry.entities.type.Player
 import mindustry.game.EventType
 import mindustry.game.Team
 import mindustry.gen.Call
+import mindustry.net.Packets
 import mindustry.net.ValidateException
 import mindustry.world.blocks.power.NuclearReactor
 import org.mapdb.DBMaker
@@ -29,7 +31,11 @@ object Listener {
         val beginTime = mutableMapOf<String,Long>()
         val gameTime = mutableMapOf<String,Int>()
         val teams = mutableMapOf<String, Team>()
+        var pvpProtect = false
+        var protectDownTime:DownTime?=null
         fun reset(players: Iterable<Player> = Vars.playerGroup.all()){
+            pvpProtect=false
+            protectDownTime?.cancel()
             startTime = System.currentTimeMillis()
             beginTime.clear()
             gameTime.clear()
@@ -91,12 +97,25 @@ object Listener {
             Helper.broadcast(builder.toString())
         }
         Events.on(EventType.PlayerBanEvent::class.java){e->
-            e.player?.con?.kick("[red]你已被服务器禁封")
+            e.player?.con?.kick(Packets.KickReason.banned)
         }
         Events.on(ValidateException::class.java){e->
             Call.onWorldDataBegin(e.player.con)
             Vars.netServer.sendWorldData(e.player)
             e.player.sendMessage("[red]检验异常,自动同步")
+        }
+        //PVP Control
+        var t=0
+        Events.on(EventType.Trigger.update){
+            if(!RuntimeData.pvpProtect)return@on
+            t=(t+1)%20
+            if (t!=0)return@on //per 20ticks
+            Vars.playerGroup.forEach {
+                if(it.isShooting&&Vars.state.teams.closestEnemyCore(it.pointerX,it.pointerY,it.team)?.withinDst(it,Vars.state.rules.enemyCoreBuildRadius)==true){
+                    it.sendMessage("[red]PVP保护时间,禁止在其他基地攻击")
+                    it.kill()
+                }
+            }
         }
     }
 

@@ -20,7 +20,7 @@ object Config {
         |  [yellow]/sync[] 同步数据(出现奇怪现象时使用)
         |  [yellow]/vote[] 投票命令
         |    [green]/vote map x[] 投票选图
-        |    [green]/vote kick xxx[] 投票踢人
+        |    [green]/vote kick xxx[] 投票踢人(直接点击Tab列表中的也可)
         |    [green]/vote gameOver[] 投票投降
         |    [green]/vote rollback[] 投票回滚(10分钟自动保存)
         |    [green]/vote skipWave[] 投票快进跳波
@@ -46,6 +46,7 @@ object Config {
         }
     val maps: Array<Map>
         get() {
+            Vars.maps.reload()
             return Vars.maps.customMaps()!!
         }
 }

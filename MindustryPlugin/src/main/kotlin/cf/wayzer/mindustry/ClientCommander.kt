@@ -141,7 +141,7 @@ object ClientCommander {
                 val result = VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
                     VoteHandler.otherData = ""
                     if(Data.adminList.contains(target.uuid)){
-                        return@startVote Helper.broadcast("[red]错误: 目标玩家为管理员, 如有问题请与服主WayZer联系")
+                        return@startVote Helper.broadcast("[red]错误: 目标玩家为管理员, 如有问题请与服主联系")
                     }
                     netServer.admins.banPlayer(target.uuid)
                     Helper.secureLog("Kick", "${target.name}(${target.uuid},${target.con.address}) is kicked By ${player.name}")
@@ -177,7 +177,8 @@ object ClientCommander {
         //Admin command
         handler.register("list", "管理指令: 列出当前所有玩家信息", ::onListPlayer)
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
-        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
+        //auto reload before maps and change map
+//        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -214,13 +215,5 @@ object ClientCommander {
             }
             p.sendMessage("[red]找不到改用户,请确定三位字母id输入正确! /list 或 /ban 查看")
         }
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onReloadMaps(arg: Array<String>, p: Player) {
-        if (!Data.adminList.contains(p.uuid))
-            return p.sendMessage("[red]你没有权限使用该命令")
-        Vars.maps.reload()
-        p.sendMessage("[green]地图重载成功!")
     }
 }
