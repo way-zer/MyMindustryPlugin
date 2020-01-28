@@ -10,10 +10,10 @@ class DownTime(private val timer: Timer, private val time:Long,
     private var endTime :Long = 0
     private var task:TimerTask? = null
 
-    private fun task(that: TimerTask){
-        val min = ((endTime - System.currentTimeMillis()) / 1000.0).roundToInt()
+    private fun task(@Suppress("UNUSED_PARAMETER") that: TimerTask){
+        val min = ((endTime - System.currentTimeMillis())/60/1000.0).roundToInt()
         if(min<=0)return end()
-        if(progress(min)&&min>1)task=timer.schedule(60*1000L,::task)
+        if(progress(min)&&min>=1)task=timer.schedule(60*1000L,::task)
     }
     fun start(){
         task?.cancel()

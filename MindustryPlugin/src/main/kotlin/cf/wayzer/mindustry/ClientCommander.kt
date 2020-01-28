@@ -7,6 +7,7 @@ import arc.util.Time
 import cf.wayzer.mindustry.Data.playerData
 import mindustry.Vars
 import mindustry.Vars.*
+import mindustry.core.NetClient
 import mindustry.entities.type.Player
 import mindustry.game.EventType
 import mindustry.game.Gamemode
@@ -63,6 +64,8 @@ object ClientCommander {
     }
 
     private fun onVote(arg: Array<String>, player: Player) {
+        //Each
+        Call.sendMessage("/vote "+arg.joinToString(" "),NetClient.colorizeName(player.id,player.name),player)
         if(playerGroup.size()==1){
             player.sendMessage("[yellow]当前服务器只有一人,若投票结束前没人加入,则一人也可通过投票(kick除外)")
         }

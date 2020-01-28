@@ -12,19 +12,8 @@ object Config {
     val motd = """
         |Welcome to this Server
         |[green]欢迎来到本服务器[]
-        |常用指令:
-        |  [yellow]/status[] 查看服务器状态
-        |  [yellow]/info[] 查看个人信息
-        |  [yellow]/maps[] 查看所有地图
-        |  [yellow]/slots[] 查看自动存档
-        |  [yellow]/sync[] 同步数据(出现奇怪现象时使用)
-        |  [yellow]/vote[] 投票命令
-        |    [green]/vote map x[] 投票选图
-        |    [green]/vote kick xxx[] 投票踢人(直接点击Tab列表中的也可)
-        |    [green]/vote gameOver[] 投票投降
-        |    [green]/vote rollback[] 投票回滚(10分钟自动保存)
-        |    [green]/vote skipWave[] 投票快进跳波
-        |[yellow]----===最新消息(1.25更新)===----
+        |[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助
+        |[blue]----===最新消息(1.25更新)===----
         |[green]现在默认只有生存模式，其他模式地图请投票选择
         """.trimMargin()
     val pluginLog = Vars.dataDirectory.child("logs").child("PluginLog.log")

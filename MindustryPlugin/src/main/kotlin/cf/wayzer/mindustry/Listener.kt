@@ -122,10 +122,7 @@ object Listener {
     private fun registerAboutPlayer() {
         Events.on(EventType.PlayerJoin::class.java) { e ->
             lastJoin = System.currentTimeMillis()
-            if (Config.motd.lines().size>10)
-                Call.onInfoMessage(e.player.con,Config.motd)
-            else
-                e.player.sendMessage(Config.motd)
+            Call.onInfoToast(e.player.con,Config.motd,30f)
             VoteHandler.handleJoin(e.player)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(
@@ -149,6 +146,8 @@ object Listener {
                 Core.app.post {
                     VoteHandler.handleVote(e.player)
                 }
+            if(e.message.startsWith('!')||e.message.startsWith('\\'))
+                e.player.sendMessage("[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助")
         }
     }
 

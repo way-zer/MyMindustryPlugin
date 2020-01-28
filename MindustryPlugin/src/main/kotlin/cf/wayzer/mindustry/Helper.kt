@@ -37,7 +37,7 @@ object Helper {
                     },{
                         Listener.RuntimeData.pvpProtect=false
                         broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
-                    })
+                    }).apply(DownTime::start)
                 }
                 else->return@post
             }
