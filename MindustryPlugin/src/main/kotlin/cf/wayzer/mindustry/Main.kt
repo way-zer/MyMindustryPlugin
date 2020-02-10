@@ -56,7 +56,7 @@ class Main : Plugin() {
 
         init {
             LibraryManager(Paths.get("libs")).apply {
-                addJCenter()
+                addAliYunMirror()
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"))
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion"))
                 require(Dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"))
@@ -71,7 +71,7 @@ class Main : Plugin() {
                 require(Dependency("net.jpountz.lz4:lz4:1.3.0"))
                 require(Dependency("org.mapdb:elsa:3.0.0-M5"))
 
-                Loader.load(this)
+                loadToClassLoader(javaClass.classLoader)
             }
         }
     }

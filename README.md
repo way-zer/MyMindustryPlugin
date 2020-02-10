@@ -49,7 +49,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 ### 自行编译
 ```shell
 cd MindustryPlugin
-.\gradlew shadowJar
+.\gradlew shadowJar #注意不是build
 cd build\libs
 ls #可以看到生成的jar文件
 ```
