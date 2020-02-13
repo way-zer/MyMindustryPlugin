@@ -1,0 +1,31 @@
+//By way_zer, references:
+//    Angular Conventions
+//    http://gitmoji.surge.sh/
+
+|$| ===Type 类型
+//Follow Angular,May different
+:sparkles: NewOrImport | 新功能或外部改善
+:bug: BugFix | bug修复
+:memo: Documentation | 添加文档
+:art: Style | 自动优化(Lint,Reformat)
+:hammer: InteralChange | 内部重构,不外部变化
+:white_check_mark: Test | 测试效果修改
+:bento: Chore | 其他代码无关的杂事
+
+|$| ===Reason 原因===
+:alien: DueToApi | 外界导致变更
+:globe_with_meridians: Globalization | 国际化
+:lock: Safe | 安全
+:zap: Proformance | 优化性能
+|$| ===Operate 操作===
+:fire: Remove | 删除xxx
+:truck: Move | 移动或重命名
+|$| ===Other 结果,变更,备注===
+:construction: UnderConstruct | 建设中
+:bookmark: NewVersion | 版本号更新
+:boom: BreakChange | 重大修改
+:ok_hand: Closes | 关闭Issue或Pull
+
+merge {
+  :twisted_rightwards_arrows: Merge From
+}
