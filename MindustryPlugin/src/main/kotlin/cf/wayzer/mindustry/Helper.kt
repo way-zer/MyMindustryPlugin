@@ -95,7 +95,8 @@ object Helper {
         Main.timer.run {
             logToConsole("[Broadcast]$message")
             Vars.playerGroup.all().forEach {
-                it.sendMessage(message)
+                if(it.con != null)
+                    it.sendMessage(message)
             }
         }
     }
