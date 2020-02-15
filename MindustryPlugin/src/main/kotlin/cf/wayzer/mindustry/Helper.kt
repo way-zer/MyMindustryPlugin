@@ -91,11 +91,11 @@ object Helper {
         Log.info(replaced)
     }
 
-    fun broadcast(message: String) {
+    fun broadcast(message: String, quite: Boolean = false) {
         Main.timer.run {
-            logToConsole("[Broadcast]$message")
+            if (!quite) logToConsole("[Broadcast]$message")
             Vars.playerGroup.all().forEach {
-                if(it.con != null)
+                if (it.con != null)
                     it.sendMessage(message)
             }
         }

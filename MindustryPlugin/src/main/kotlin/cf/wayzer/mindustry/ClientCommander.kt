@@ -5,6 +5,7 @@ import arc.Events
 import arc.util.CommandHandler
 import arc.util.Time
 import cf.wayzer.mindustry.Data.playerData
+import cf.wayzer.mindustry.expr.UnitBuilder
 import mindustry.Vars
 import mindustry.Vars.*
 import mindustry.core.NetClient
@@ -31,6 +32,7 @@ object ClientCommander {
         handler.register("slots", "查看自动存档") { _, p: Player -> p.sendMessage(Helper.listBackup()) }
         handler.register("vote", "<map/gameOver/kick/skipWave/rollback> [params...]",
                 "进行投票:换图/投降/踢人/跳波/回滚", ::onVote)
+        handler.register("spectate", "变为观察者", ::onSpectate)
         registerAdmin(handler)
     }
 
@@ -165,15 +167,26 @@ object ClientCommander {
     private fun onMaps(arg: Array<String>, player: Player) {
         val mode:Gamemode? = arg.getOrNull(0).let {
             when {
-                "pvp".equals(it,true) -> Gamemode.pvp
-                "attack".equals(it,true) -> Gamemode.attack
-                "all".equals(it,true) -> null
+                "pvp".equals(it, true) -> Gamemode.pvp
+                "attack".equals(it, true) -> Gamemode.attack
+                "all".equals(it, true) -> null
                 else -> Gamemode.survival
             }
         }
         val page = arg.lastOrNull()?.toIntOrNull() ?: 1
         player.sendMessage("[yellow]默认只显示所有生存图,输入[green]/maps pvp[yellow]显示pvp图,[green]/maps attack[yellow]显示攻城图[green]/maps all[yellow]显示所有")
-        player.sendMessage(Helper.listMap(page,mode))
+        player.sendMessage(Helper.listMap(page, mode))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onSpectate(arg: Array<String>, player: Player) {
+        if (player.team == Config.spectateTeam)
+            return player.sendMessage("[red]你已经是观察者了")
+        Helper.broadcast("[yellow]玩家[green]${player.name}[yellow]选择成为观察者", true)
+        player.team = Config.spectateTeam
+        player.lastSpawner = null
+        player.spawner = null
+        Call.onPlayerDeath(player)
     }
 
     private fun registerAdmin(handler: CommandHandler) {
@@ -182,6 +195,7 @@ object ClientCommander {
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
         //auto reload before maps and change map
 //        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
+        handler.register("expr", "[any]", ::onExperiment)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -218,5 +232,12 @@ object ClientCommander {
             }
             p.sendMessage("[red]找不到改用户,请确定三位字母id输入正确! /list 或 /ban 查看")
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onExperiment(arg: Array<String>, p: Player) {
+        if (!Data.adminList.contains(p.uuid))
+            return p.sendMessage("[red]你没有权限使用该命令")
+        UnitBuilder.createForPlayer(p)
     }
 }
