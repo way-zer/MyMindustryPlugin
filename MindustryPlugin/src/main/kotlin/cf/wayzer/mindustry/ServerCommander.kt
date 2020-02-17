@@ -65,6 +65,7 @@ object ServerCommander {
         Helper.logToConsole("[green]Add Success.")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onBans(arg: Array<String>) {
         val list = Vars.netServer.admins.banned
         val sorted = list.sortedByDescending { it.lastKicked }

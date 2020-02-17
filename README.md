@@ -21,27 +21,34 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - /votekick <player...>(原版指令,导向/vote kick <player...>)
 - /maps 查看服务器地图
 - /slots 查看自动备份
+- /spectate 进入观察者模式
 - /vote 各种投票功能  
-  skipwave 投票跳波(10波)  
-  gameover 投降  
-  map <id(见/maps)> 换图  
-  rollback <id(见/slots)> 回滚地图  
-  kick <player...> 投票踢人(ban)(直接点Tab中的会重定向到该指令)  
+    skipwave 投票跳波(快速进行10波)  
+    gameover 投降  
+    map <id(见/maps)> 换图  
+    rollback <id(见/slots)> 回滚地图  
+    kick <player...> 投票踢人(3次15分钟警告,然后ban)(直接点Tab中的会重定向到该指令)
 #### 管理员指令:
 - /list 查看服务器玩家Id列表
-- /ban [三位id] 查看已ban玩家,ban玩家(或解ban) | 三位id见/list
-- ~~/reloadMaps 重载地图(地图上传功能请使用其他软件实现)  ~~(在需要时自动reload)
+- /ban [三位id] 查看已ban玩家,ban玩家(或解ban) | 三位id见/list | 点tab列表中的投票也有相同效果
+- /robot (实验性功能) 召唤专用鬼怪建筑机 管理员可用,1分钟复活,限2个
+- ~~/reloadMaps 重载地图(地图上传功能请使用其他软件实现) ~~(在需要时自动reload)
 #### 后台指令:
 - /maps (覆盖原版)内容与玩家基本相同
 - /load (覆盖原版)加载某个slot存档(不限于自动保存)
 - /host (覆盖原版)用法和原版基本相同
 - /madmin [uuid] 查看当前管理员,增减管理员
+- /mBans 类似原版/bans,按时间排序,可显示日期
+- /mInfo <UUID> 显示玩家统计信息
 - /addExp <playerId> <num> 增加玩家经验(暂无多用,用户等级系统正在计划中)
 
 ### 未来计划
 - 增加反捣乱措施
 - 完善用户等级机制
 - 直接地图评价机制
+
+### 更新日记及下载
+请见[发布页](https://github.com/way-zer/MyMindustryPlugin/releases)
 
 ## 安装方式
 在Relase中下载最新jar,放置在config/mods下即可

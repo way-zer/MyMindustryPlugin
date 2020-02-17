@@ -45,14 +45,23 @@ object Listener {
             robots.clear()
             // 设置所有在场玩家时间
             players.forEach {
-                beginTime[it.uuid]=System.currentTimeMillis()
+                beginTime[it.uuid] = System.currentTimeMillis()
             }
         }
-        fun calTime(){
+
+        fun calTime() {
             beginTime.forEach { (uuid, start) ->
-                gameTime.merge(uuid,(System.currentTimeMillis()-start).toInt(),Int::plus)
-                beginTime[uuid]=System.currentTimeMillis()
+                gameTime.merge(uuid, (System.currentTimeMillis() - start).toInt(), Int::plus)
+                beginTime[uuid] = System.currentTimeMillis()
             }
+        }
+
+        /**
+         * ensure map don't change in last time
+         * @param time in millis
+         */
+        fun ensureNotChange(time: Int): Boolean {
+            return Time.millis() - startTime > time
         }
     }
     fun register() {
@@ -144,14 +153,17 @@ object Listener {
             playerData[e.player.uuid] = data
             RuntimeData.calTime()
             RuntimeData.beginTime.remove(e.player.uuid)
+            RuntimeData.robots.remove(e.player.uuid)
         }
         Events.on(EventType.PlayerChatEvent::class.java) { e ->
             if (e.message.equals("y", true))
                 Core.app.post {
                     VoteHandler.handleVote(e.player)
                 }
-            if(e.message.startsWith('!')||e.message.startsWith('\\'))
-                e.player.sendMessage("[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助")
+            if (e.message.startsWith('!') || e.message.startsWith('\\'))
+                Core.app.post {
+                    e.player.sendMessage("[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助")
+                }
         }
     }
 

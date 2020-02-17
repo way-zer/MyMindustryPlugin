@@ -80,7 +80,7 @@ object Helper {
             //pair: id,map
             if (index in prePage * (page - 1) until prePage * page) {
                 with(pair.second) {
-                    text.append("[red]%2d[]:[yellow]%16s[]|[yellow]%16s[green](%d,%d)".format(pair.first, file.file().nameWithoutExtension, name(), width, height))
+                    text.append("[red]%2d[green](%d,%d)[]:[yellow]%s[]\t | [blue]%s\n".format(pair.first, width, height, file.file().nameWithoutExtension, name()))
                 }
             }
         }

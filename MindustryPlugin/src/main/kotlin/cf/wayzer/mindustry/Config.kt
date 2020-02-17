@@ -14,8 +14,9 @@ object Config {
         |Welcome to this Server
         |[green]欢迎来到本服务器[]
         |[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助
-        |[blue]----===最新消息(2.15更新)===----
+        |[blue]----===最新消息(2.18更新)===----
         |[green]新增观察者模式/spectate
+        |[green]/maps中现在可以看到地图大小
         """.trimMargin()
     val pluginLog = Vars.dataDirectory.child("logs").child("PluginLog.log")
 

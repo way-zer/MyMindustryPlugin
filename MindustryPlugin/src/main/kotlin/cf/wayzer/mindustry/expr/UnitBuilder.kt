@@ -1,31 +1,32 @@
 package cf.wayzer.mindustry.expr
 
+import cf.wayzer.mindustry.Listener
+import cf.wayzer.mindustry.Main
 import mindustry.Vars
 import mindustry.content.UnitTypes
 import mindustry.entities.type.BaseUnit
 import mindustry.entities.type.Player
 import mindustry.entities.type.base.BuilderDrone
 import mindustry.world.blocks.BuildBlock.BuildEntity
+import java.io.DataInput
+import kotlin.concurrent.schedule
 
-class UnitBuilder(private val targetPlayer: Player) : BuilderDrone() {
+class UnitBuilder(private val bindPlayer: Player) : BuilderDrone() {
     override fun update() {
         //check before call super(prevent super change state)
         val check = !this.isBuilding && timer[BaseUnit.timerTarget2, 14.0f]
+        playerTarget = bindPlayer
         super.update()
-        if (targetPlayer.con == null) {
+        if (bindPlayer.con == null) {
             return this.kill()
-        }
-        if (dead) {
-            health = maxHealth()
-            dead = false
         }
         if (check) {
             //reset state
             placeQueue.clear()
-            setState(startState)
-            target = targetPlayer
+            playerTarget = bindPlayer
+            target = bindPlayer
 
-            targetPlayer.buildRequest()?.let {
+            bindPlayer.buildRequest()?.let {
                 val tile = Vars.world.tile(it.x, it.y)
                 if (tile?.entity is BuildEntity) {
                     val b = tile.ent<BuildEntity>()
@@ -39,6 +40,20 @@ class UnitBuilder(private val targetPlayer: Player) : BuilderDrone() {
                 }
             }
         }
+    }
+
+    override fun onDeath() {
+        super.onDeath()
+        bindPlayer.sendMessage("[yellow]建筑机将在一分钟后复活")
+        Main.timer.schedule(60 * 1000L) {
+            if (bindPlayer.con != null && Listener.RuntimeData.ensureNotChange(60 * 1000))
+                createForPlayer(bindPlayer)
+        }
+    }
+
+    override fun read(data: DataInput?) {
+        super.read(data)
+        this.dead = true
     }
 
     companion object {
