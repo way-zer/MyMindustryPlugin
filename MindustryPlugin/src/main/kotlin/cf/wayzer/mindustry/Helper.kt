@@ -13,6 +13,7 @@ import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.io.SaveIO
 import mindustry.maps.Map
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
@@ -54,10 +55,11 @@ object Helper {
     fun listBackup(): String {
         val text = StringBuilder()
         text.append("[green]===[white] 自动存档 [green]===\n")
+        val dataFormat = SimpleDateFormat("hh:mm")
         Config.saveRange.forEach {
             val file = SaveIO.fileFor(it)
             if (file.exists()) {
-                text.append("  [red]$it[]: [yellow]Save on ${Date(file.lastModified())}\n")
+                text.append("  [red]$it[]: [yellow]Save on ${dataFormat.format(Date(file.lastModified()))}\n")
             }
         }
         text.append("[green]===[white] 100-105 [green]===")
@@ -65,17 +67,21 @@ object Helper {
     }
 
     fun listMap(p: Int,mode: Gamemode?= Gamemode.survival): String {
-        val maps = Config.maps.mapIndexed{index, map -> (index+1) to map }
-                .filter { mode==null||bestMode(it.second)==mode }
+        val prePage = 7
+        val maps = Config.maps.mapIndexed { index, map -> (index + 1) to map }
+                .filter { mode == null || bestMode(it.second) == mode }
         val totalPage = ceil(maps.size / 7f).toInt()
         var page = p
         if (page < 1) page = 1
         if (page > totalPage) page = totalPage
         val text = StringBuilder()
         text.append("[green]===[white] 服务器地图 [green]===\n")
-        maps.forEachIndexed { index, pair ->//pair: id,map
-            if (index in 7 * (page - 1) until 7 * page) {
-                text.append("  [red]${pair.first}[]:[yellow]${pair.second.file.file().nameWithoutExtension}[] | [yellow]${pair.second.name()}[]\n")
+        maps.forEachIndexed { index, pair ->
+            //pair: id,map
+            if (index in prePage * (page - 1) until prePage * page) {
+                with(pair.second) {
+                    text.append("[red]%2d[]:[yellow]%16s[]|[yellow]%16s[green](%d,%d)".format(pair.first, file.file().nameWithoutExtension, name(), width, height))
+                }
             }
         }
         text.append("[green]===[white] $page/$totalPage [green]===")
@@ -146,7 +152,7 @@ object Helper {
 
     private class MyAssigner(private val old:NetServer.TeamAssigner):NetServer.TeamAssigner{
         override fun assign(player: Player, p1: MutableIterable<Player>): Team {
-            if (!Vars.state.rules.pvp)return Vars.state.rules.defaultTeam;
+            if (!Vars.state.rules.pvp) return Vars.state.rules.defaultTeam
             return Listener.RuntimeData.teams.getOrPut(player.uuid){
                 //not use old,because it may assign to team without core
                 val teams = Vars.state.teams.active.filter { it.hasCore() }

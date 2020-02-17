@@ -6,7 +6,6 @@ import arc.util.CommandHandler
 import arc.util.Time
 import cf.wayzer.mindustry.Data.playerData
 import cf.wayzer.mindustry.expr.UnitBuilder
-import mindustry.Vars
 import mindustry.Vars.*
 import mindustry.core.NetClient
 import mindustry.entities.type.Player
@@ -15,6 +14,10 @@ import mindustry.game.Gamemode
 import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.io.SaveIO
+import mindustry.net.Packets
+import java.lang.Integer.min
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -40,9 +43,10 @@ object ClientCommander {
     private fun onStatus(arg: Array<String>, player: Player) {
         player.sendMessage("""
             |[green]服务器状态[]
-            |   [green]地图: [yellow]${Vars.world.map.name()}[]
+            |   [green]地图: [yellow]${world.map.name()}[]
             |   [green]${(60f / Time.delta()).toInt()} FPS, ${Core.app.javaHeap / 1024 / 1024} MB used[]
             |   [green]总单位数: ${unitGroup.size()}
+            |   [yellow]被禁封总数: ${netServer.admins.banned.size}
         """.trimMargin())
     }
 
@@ -145,10 +149,14 @@ object ClientCommander {
                     return player.sendMessage("[red]PVP模式禁止踢出其他队玩家")
                 val result = VoteHandler.startVote("踢人(${player.name}踢出[red]${target.name}[])") {
                     VoteHandler.otherData = ""
-                    if(Data.adminList.contains(target.uuid)){
+                    if (Data.adminList.contains(target.uuid)) {
                         return@startVote Helper.broadcast("[red]错误: 目标玩家为管理员, 如有问题请与服主联系")
                     }
-                    netServer.admins.banPlayer(target.uuid)
+                    if (target.info.timesKicked < 3) {
+                        target.info.lastKicked = Time.millis() + (15 * 60 * 1000) //Kick for 15 Minutes
+                        target.con?.kick(Packets.KickReason.vote)
+                    } else
+                        netServer.admins.banPlayer(target.uuid)
                     Helper.secureLog("Kick", "${target.name}(${target.uuid},${target.con.address}) is kicked By ${player.name}")
                 }
                 if (result) {
@@ -195,7 +203,7 @@ object ClientCommander {
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
         //auto reload before maps and change map
 //        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
-        handler.register("expr", "[any]", ::onExperiment)
+        handler.register("robot", "实验性功能: 召唤专用鬼怪建筑机", ::onExperiment)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -213,8 +221,11 @@ object ClientCommander {
             return p.sendMessage("[red]你没有权限使用该命令")
         val uuid = arg.getOrNull(0)
         if (uuid == null) {
-            p.sendMessage("Bans: " + netServer.admins.banned.map {
-                return@map "[white]${it.lastName}[]([red]${it.id.subSequence(0, 3)}[])"
+            val dateFormat = SimpleDateFormat("MM:dd")
+            val sorted = netServer.admins.banned.sortedByDescending { it.lastKicked }
+            p.sendMessage("Bans: " + sorted.subList(0, min(8, sorted.size)).map {
+                val date = dateFormat.format(Date(it.lastKicked))
+                return@map "[white]${it.lastName}[]([red]${it.id.subSequence(0, 3)} [white]$date[])"
             }.joinToString(" , "))
         } else {
             netServer.admins.banned.forEach {
@@ -238,6 +249,18 @@ object ClientCommander {
     private fun onExperiment(arg: Array<String>, p: Player) {
         if (!Data.adminList.contains(p.uuid))
             return p.sendMessage("[red]你没有权限使用该命令")
-        UnitBuilder.createForPlayer(p)
+        p.sendMessage("[yellow]该功能目前正处于实验阶段，有问题请立即与WayZer联系")
+        if (state.rules.pvp)
+            return p.sendMessage("[red]PVP模式禁止使用")
+        val now = Listener.RuntimeData.robots.getOrDefault(p.uuid, 0)
+        if (now >= 2)
+            return p.sendMessage("[red]目前一个玩家最多使用两个")
+        Listener.RuntimeData.robots[p.uuid] = now + 1
+        try {
+            UnitBuilder.createForPlayer(p)
+        } catch (e: Exception) {
+            Helper.secureLog("EXPR_ERR", e.message ?: "")
+            e.printStackTrace()
+        }
     }
 }

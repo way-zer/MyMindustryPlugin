@@ -7,6 +7,8 @@ import mindustry.Vars.playerGroup
 import mindustry.Vars.world
 import mindustry.game.Gamemode
 import mindustry.io.SaveIO
+import java.text.SimpleDateFormat
+import java.util.*
 
 object ServerCommander {
     fun register(handler: CommandHandler) {
@@ -17,6 +19,8 @@ object ServerCommander {
         handler.register("host", "[id] [mode]", "Change map", ::onChange)
         handler.register("load", "<id/name>", "Load save", ::onLoad)
         handler.register("addExp", "<playerId> <num>", "Add Exp to Player", ::onAddExp)
+        handler.register("mInfo", "<uuid>", "Show Player info", ::onInfo)
+        handler.register("mBans", "", "List bans", ::onBans)
         handler.register("mAdmin", "[uuid]", "List or Toggle admin", ::onAdmin)
     }
 
@@ -61,12 +65,41 @@ object ServerCommander {
         Helper.logToConsole("[green]Add Success.")
     }
 
+    private fun onBans(arg: Array<String>) {
+        val list = Vars.netServer.admins.banned
+        val sorted = list.sortedByDescending { it.lastKicked }
+        val dateFormat = SimpleDateFormat("MM:dd")
+        val builder = StringBuilder("Banned Player:")
+        sorted.forEachIndexed { index, info ->
+            if (index > 7) return //Show only 8
+            val date = dateFormat.format(Date(info.lastKicked))
+            builder.append("$date | ${info.id} | ${info.lastName} \n")
+        }
+        Helper.logToConsole(builder.toString())
+    }
+
+    private fun onInfo(arg: Array<String>) {
+        val uuid = arg[0]
+        val dataFormat = SimpleDateFormat("MM:dd hh:mm")
+        val info = playerData[uuid] ?: return Helper.logToConsole("[red]Can't found player")
+        with(info) {
+            Helper.logToConsole("""
+            | $lastName[]($uuid)
+            | FirstJoin: ${dataFormat.format(firstJoin)} 
+            | LastJoin: ${dataFormat.format(lastJoin)}($lastAddress)
+            | PlayedTime(Min): ${playedTime / 60}
+            | Level: $level(Exp $exp)
+            """.trimMargin("|"))
+        }
+    }
+
     private fun onAdmin(arg: Array<String>) {
         val uuid = arg.getOrNull(0)
         if (uuid == null) {
+            val dataFormat = SimpleDateFormat("MM:dd hh:mm")
             Helper.logToConsole("Admins: " + Data.adminList.map {
                 val info = playerData[it] ?: return@map it
-                return@map "${info.lastName}($it)"
+                return@map "${info.lastName}($it,${dataFormat.format(info.lastJoin)})"
             }.joinToString(" , "))
         } else {
             if (Data.adminList.contains(uuid)) {

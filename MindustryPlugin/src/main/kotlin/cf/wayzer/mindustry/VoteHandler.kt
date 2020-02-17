@@ -44,9 +44,9 @@ object VoteHandler {
     fun handleVote(player: Player) {
         if (!doing) return
         if (voted.contains(player.uuid ?: "UNOWNED"))
-            return player.sendMessage("[red]你已经投过票了")
+            return broadcast("[red]你已经投过票了", true)
         voted.add(player.uuid ?: "UNOWNED")
-        player.sendMessage("[green]投票成功")
+        broadcast("[green]投票成功", true)
         val require = max(playerGroup.size() / 2, 1)
         if (voted.size > require) {
             task?.cancel()

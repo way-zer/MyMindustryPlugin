@@ -2,6 +2,7 @@ package cf.wayzer.mindustry
 
 import arc.Core
 import arc.Events
+import arc.util.Time
 import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
 import cf.wayzer.mindustry.util.DownTime
@@ -31,6 +32,7 @@ object Listener {
         val beginTime = mutableMapOf<String,Long>()
         val gameTime = mutableMapOf<String,Int>()
         val teams = mutableMapOf<String, Team>()
+        val robots = mutableMapOf<String, Int>()
         var pvpProtect = false
         var protectDownTime:DownTime?=null
         fun reset(players: Iterable<Player> = Vars.playerGroup.all()){
@@ -40,6 +42,7 @@ object Listener {
             beginTime.clear()
             gameTime.clear()
             teams.clear()
+            robots.clear()
             // 设置所有在场玩家时间
             players.forEach {
                 beginTime[it.uuid]=System.currentTimeMillis()
@@ -97,6 +100,7 @@ object Listener {
             Helper.broadcast(builder.toString())
         }
         Events.on(EventType.PlayerBanEvent::class.java){e->
+            e.player?.info?.lastKicked = Time.millis()
             e.player?.con?.kick(Packets.KickReason.banned)
         }
         Events.on(ValidateException::class.java){e->

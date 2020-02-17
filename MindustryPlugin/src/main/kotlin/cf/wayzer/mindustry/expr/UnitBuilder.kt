@@ -13,8 +13,13 @@ class UnitBuilder(private val targetPlayer: Player) : BuilderDrone() {
         val check = !this.isBuilding && timer[BaseUnit.timerTarget2, 14.0f]
         super.update()
         if (targetPlayer.con == null) {
-            this.kill()
-        } else if (check) {
+            return this.kill()
+        }
+        if (dead) {
+            health = maxHealth()
+            dead = false
+        }
+        if (check) {
             //reset state
             placeQueue.clear()
             setState(startState)
