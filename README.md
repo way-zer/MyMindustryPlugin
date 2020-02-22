@@ -32,7 +32,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - /list 查看服务器玩家Id列表
 - /ban [三位id] 查看已ban玩家,ban玩家(或解ban) | 三位id见/list | 点tab列表中的投票也有相同效果
 - /robot (实验性功能) 召唤专用鬼怪建筑机 管理员可用,1分钟复活,限2个
-- ~~/reloadMaps 重载地图(地图上传功能请使用其他软件实现) ~~(在需要时自动reload)
+- ~~/reloadMaps 重载地图(地图上传功能请使用其他软件实现)~~(在需要时自动reload)
 #### 后台指令:
 - /maps (覆盖原版)内容与玩家基本相同
 - /load (覆盖原版)加载某个slot存档(不限于自动保存)
