@@ -31,6 +31,7 @@ object Data {
     }
 
     private val db = DBMaker.fileDB(Config.dataFile.file())
+            .checksumHeaderBypass()
             .closeOnJvmShutdown()
             .fileMmapEnableIfSupported()
             .make()

@@ -23,15 +23,15 @@ object VoteHandler {
         if(playerGroup.size()!=1)one =false
         broadcast("[yellow]$text [yellow]投票开始,输入y同意")
         welcomeMessage = "[yellow]当前正在进行$text [yellow]投票，输入y同意"
-        task = Main.timer.schedule(Config.voteTime) {
+        task = Main.timer.schedule(Config.vote.voteTime.toMillis()) {
             val require = max(playerGroup.size() / 2, 1)
             if (voted.size > require) {
                 broadcast("[yellow]$text [yellow]投票结束,投票成功.[green]${voted.size}/${playerGroup.size()}[yellow],超过[red]$require [yellow]人")
                 callback()
-            } else if (one&&voted.size==1&&(Listener.lastJoin+Config.voteTime<System.currentTimeMillis())){
+            } else if (one && voted.size == 1 && (Listener.lastJoin + Config.vote.voteTime.toMillis() < System.currentTimeMillis())) {
                 broadcast("[yellow]$text [yellow]投票通过.")
                 callback()
-            }else {
+            } else {
                 broadcast("[yellow]$text [yellow]投票结束,投票失败.[green]${voted.size}/${playerGroup.size()}[yellow],未超过[red]$require [yellow]人")
             }
             voted.clear()

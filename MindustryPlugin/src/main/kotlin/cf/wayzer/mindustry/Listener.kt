@@ -3,7 +3,6 @@ package cf.wayzer.mindustry
 import arc.Core
 import arc.Events
 import arc.util.Time
-import cf.wayzer.mindustry.Config.waitingTimeRound
 import cf.wayzer.mindustry.Data.playerData
 import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
@@ -81,10 +80,10 @@ object Listener {
             Call.onInfoMessage("""
                 | ${if (Vars.state.rules.pvp) "[YELLOW] ${e.winner.name} 队胜利![]" else "[SCARLET]游戏结束![]"}
                 | 下一张地图为:[accent]${map.name()}[] By: [accent]${map.author()}[]
-                | 下一场游戏将在 ${waitingTimeRound / 1000} 秒后开始
+                | 下一场游戏将在 ${Config.base.waitingTime.seconds} 秒后开始
             """.trimMargin())
             Helper.logToConsole("Next map is ${map.name()}")
-            Main.timer.schedule(waitingTimeRound) {
+            Main.timer.schedule(Config.base.waitingTime.toMillis()) {
                 Helper.loadMap(map)
             }
             //TODO 结算经验 And 排行榜系统
@@ -135,7 +134,7 @@ object Listener {
     private fun registerAboutPlayer() {
         Events.on(EventType.PlayerJoin::class.java) { e ->
             lastJoin = System.currentTimeMillis()
-            Call.onInfoToast(e.player.con,Config.motd,30f)
+            Call.onInfoToast(e.player.con, Config.base.welcome, 30f)
             VoteHandler.handleJoin(e.player)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(
@@ -177,15 +176,15 @@ object Listener {
         Events.on(EventType.UnitCreateEvent::class.java){e->
             if(e.unit.team == Vars.state.rules.waveTeam)return@on
             when(Vars.unitGroup.count { it.team == e.unit.team }){
-                in Config.unitToWarn until Config.unitToStop ->
+                in Config.base.unitWarnRange ->
                     Vars.playerGroup.all().forEach {
-                        if(it.team == e.unit.team){
+                        if (it.team == e.unit.team) {
                             it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿")
                         }
                     }
-                in Config.unitToStop..10000 ->{
+                in Config.base.unitWarnRange.last..10000 -> {
                     Vars.playerGroup.all().forEach {
-                        if(it.team == e.unit.team){
+                        if (it.team == e.unit.team) {
                             it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成")
                         }
                     }

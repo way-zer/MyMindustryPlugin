@@ -22,6 +22,7 @@ object ServerCommander {
         handler.register("mInfo", "<uuid>", "Show Player info", ::onInfo)
         handler.register("mBans", "", "List bans", ::onBans)
         handler.register("mAdmin", "[uuid]", "List or Toggle admin", ::onAdmin)
+        handler.register("reloadConfig", "reload plugin config") { Config.load() }
     }
 
     @Suppress("DuplicatedCode")

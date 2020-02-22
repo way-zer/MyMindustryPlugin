@@ -41,6 +41,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - /mBans 类似原版/bans,按时间排序,可显示日期
 - /mInfo <UUID> 显示玩家统计信息
 - /addExp <playerId> <num> 增加玩家经验(暂无多用,用户等级系统正在计划中)
+- /reloadConfig 重载配置文件
 
 ### 未来计划
 - 增加反捣乱措施

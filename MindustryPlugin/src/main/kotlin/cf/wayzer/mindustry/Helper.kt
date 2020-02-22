@@ -28,15 +28,15 @@ object Helper {
         Core.app.post {//After reset And Load
             when(mode){
                 Gamemode.pvp->{
-                    Listener.RuntimeData.protectDownTime= DownTime(Main.timer,Config.pvpProtectTime,{
-                        Listener.RuntimeData.pvpProtect=true
-                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续"+TimeUnit.MILLISECONDS.toMinutes(Config.pvpProtectTime)+"分钟)")
-                    },{
-                        if(Vars.world.map != map) return@DownTime false
-                        Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟",10f)
+                    Listener.RuntimeData.protectDownTime = DownTime(Main.timer, Config.base.pvpProtectTime.toMillis(), {
+                        Listener.RuntimeData.pvpProtect = true
+                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + TimeUnit.MILLISECONDS.toMinutes(Config.base.pvpProtectTime.toMinutes()) + "分钟)")
+                    }, {
+                        if (Vars.world.map != map) return@DownTime false
+                        Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟", 10f)
                         return@DownTime true
-                    },{
-                        Listener.RuntimeData.pvpProtect=false
+                    }, {
+                        Listener.RuntimeData.pvpProtect = false
                         broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
                     }).apply(DownTime::start)
                 }
@@ -56,7 +56,7 @@ object Helper {
         val text = StringBuilder()
         text.append("[green]===[white] 自动存档 [green]===\n")
         val dataFormat = SimpleDateFormat("hh:mm")
-        Config.saveRange.forEach {
+        Config.vote.savesRange.forEach {
             val file = SaveIO.fileFor(it)
             if (file.exists()) {
                 text.append("  [red]$it[]: [yellow]Save on ${dataFormat.format(Date(file.lastModified()))}\n")

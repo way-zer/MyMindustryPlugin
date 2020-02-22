@@ -110,8 +110,8 @@ object ClientCommander {
                     return player.sendMessage("[red]投票进行中")
                 VoteHandler.startVote("跳波",true) {
                     var i = 0
-                    Main.timer.schedule(0,Config.skipWaveInterval){
-                        if (state.gameOver|| state.enemies > 300 || i >=10)cancel()
+                    Main.timer.schedule(0, Config.vote.skipWaveInterval.toMillis()) {
+                        if (state.gameOver || state.enemies > 300 || i >= 10) cancel()
                         i++
                         logic.runWave()
                     }
@@ -121,12 +121,12 @@ object ClientCommander {
                 if (arg.size < 2)
                     return player.sendMessage("[red]请输入存档编号")
                 val id = arg[1].toIntOrNull()
-                if (id == null || id !in Config.saveRange)
+                if (id == null || id !in Config.vote.savesRange)
                     return player.sendMessage("[red]错误参数")
                 val file = SaveIO.fileFor(id)
                 if (!SaveIO.isSaveValid(file))
                     return player.sendMessage("[red]存档不存在或存档损坏")
-                val voteFile = SaveIO.fileFor(Config.voteSaveSolt)
+                val voteFile = SaveIO.fileFor(Config.vote.tempSlot)
                 if (voteFile.exists()) voteFile.delete()
                 file.copyTo(voteFile)
                 VoteHandler.startVote("回档",true) {

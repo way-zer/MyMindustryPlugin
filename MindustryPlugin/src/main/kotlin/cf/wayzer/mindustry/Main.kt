@@ -4,6 +4,7 @@ import arc.Core
 import arc.util.CommandHandler
 import cf.wayzer.libraryManager.Dependency
 import cf.wayzer.libraryManager.LibraryManager
+import cf.wayzer.mindustry.util.IntRangeReader
 import mindustry.Vars
 import mindustry.core.GameState
 import mindustry.io.SaveIO
@@ -15,6 +16,8 @@ import kotlin.concurrent.schedule
 
 class Main : Plugin() {
     override fun init() {
+        IntRangeReader.register()
+        Config.load()
         Listener.register()
         hackServerControl()
         Helper.setTeamAssigner()
@@ -25,7 +28,7 @@ class Main : Plugin() {
         if (Vars.state.`is`(GameState.State.playing)) {
             val minute = ((that.scheduledExecutionTime() / TimeUnit.MINUTES.toMillis(1)) % 60).toInt() //Get the minute
             Core.app.post {
-                val id = Config.saveRange.first + minute / 10
+                val id = Config.vote.savesRange.first + minute / 10
                 SaveIO.save(SaveIO.fileFor(id))
                 Helper.broadcast("[green]自动存档完成(10分钟一次),存档号 [red]$id")
             }
@@ -70,6 +73,10 @@ class Main : Plugin() {
                 require(Dependency("com.google.guava:guava:28.1-jre"))
                 require(Dependency("net.jpountz.lz4:lz4:1.3.0"))
                 require(Dependency("org.mapdb:elsa:3.0.0-M5"))
+
+                require(Dependency("io.github.config4k:config4k:0.4.2"))
+                require(Dependency("com.typesafe:config:1.3.3"))
+                require(Dependency("org.jetbrains.kotlin:kotlin-reflect:1.3.10"))
 
                 loadToClassLoader(javaClass.classLoader)
             }
