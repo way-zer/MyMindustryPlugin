@@ -55,7 +55,6 @@ object Config {
     lateinit var base: GameConfig
     lateinit var vote: VoteConfig
     fun load() {
-        print(defaultConfig.root().render())
         val config = ConfigFactory.parseFile(configFile.file())
                 .withFallback(defaultConfig)
         config.checkValid(defaultConfig)
