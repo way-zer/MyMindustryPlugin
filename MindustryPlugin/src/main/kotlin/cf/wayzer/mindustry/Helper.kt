@@ -15,7 +15,6 @@ import mindustry.io.SaveIO
 import mindustry.maps.Map
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
 object Helper {
@@ -30,7 +29,7 @@ object Helper {
                 Gamemode.pvp->{
                     RuntimeData.protectDownTime = DownTime(Main.timer, Config.base.pvpProtectTime.toMillis(), {
                         RuntimeData.pvpProtect = true
-                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + TimeUnit.MILLISECONDS.toMinutes(Config.base.pvpProtectTime.toMinutes()) + "分钟)")
+                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + Config.base.pvpProtectTime.toMinutes() + "分钟)")
                     }, {
                         if (Vars.world.map != map) return@DownTime false
                         Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟", 10f)
