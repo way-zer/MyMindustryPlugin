@@ -93,6 +93,7 @@ object Helper {
                 .replace("[red]", ColorCodes.LIGHT_RED)
                 .replace("[yellow]", ColorCodes.YELLOW)
                 .replace("[white]", ColorCodes.WHITE)
+                .replace("[blue]", ColorCodes.LIGHT_BLUE)
                 .replace("[]", ColorCodes.RESET)
         Log.info(replaced)
     }
@@ -110,7 +111,7 @@ object Helper {
     fun nextMap(map: Map? = null,mode: Gamemode = Gamemode.survival): Map {
         val maps = Config.maps.copy()
         maps.shuffle()
-        return  maps.filter { bestMode(it)==mode}.first { it != map } ?: maps[0]
+        return maps.filter { bestMode(it) == mode }.firstOrNull { it != map } ?: maps[0]
     }
 
     fun bestMode(map: Map): Gamemode {
@@ -118,6 +119,8 @@ object Helper {
             'A' -> Gamemode.attack
             'P' -> Gamemode.pvp
             'S' -> Gamemode.survival
+            'C' -> Gamemode.sandbox
+            'E' -> Gamemode.editor
             else -> Gamemode.bestFit(map.rules())
         }
     }

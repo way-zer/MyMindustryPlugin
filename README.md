@@ -3,12 +3,12 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 当前使用在我自己服务器 m.tiny:smile:lake.tk
 
 ## 功能介绍
-1. 重写默认换图机制(可以根据文件名首字母确定模式 S生存P对抗A攻击)
+1. 重写默认换图机制(可以根据文件名首字母确定模式 S生存P对抗A攻击C沙盒创造E编辑器模式)
 2. 完整投票功能(跳波,换图,踢人,投降,回滚)
 3. 每10分钟自动保存(整10, xx:00保存为100,xx:50保存为105)
 4. 额外的管理员系统(可以执行管理员指令,vote kick立即执行)
 5. 进服欢迎信息(目前为硬编码,如需修改,请修改源码并手动编译)
-6. 开源,可直接修改配置(配置在[Config.kt](https://github.com/way-zer/MyMindustryPlugin/blob/master/MindustryPlugin/src/main/kotlin/cf/wayzer/mindustry/Config.kt)文件中)
+6. 开源,~~可直接修改配置(配置在[Config.kt](https://github.com/way-zer/MyMindustryPlugin/blob/master/MindustryPlugin/src/main/kotlin/cf/wayzer/mindustry/Config.kt)文件中)~~(已有配置文件config/pluginConf.conf)
 7. PVP辅助(PVP保护时间;防止重进换队等)
 8. 贡献榜(一局结算一次,目前根据时间贡献,有更好的请联系我)
 9. 限制每队单位数量(兵和无人机,防卡服)
@@ -47,6 +47,8 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - 增加反捣乱措施
 - 完善用户等级机制
 - 直接地图评价机制
+- 增加对沙盒和编辑器模式的支持
+- 国际化支持(每个玩家单独语言)
 
 ### 更新日记及下载
 请见[发布页](https://github.com/way-zer/MyMindustryPlugin/releases)

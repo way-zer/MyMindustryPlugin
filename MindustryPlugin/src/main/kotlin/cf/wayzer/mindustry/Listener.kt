@@ -9,6 +9,7 @@ import mindustry.Vars
 import mindustry.content.Blocks
 import mindustry.entities.type.Player
 import mindustry.game.EventType
+import mindustry.game.Gamemode
 import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.net.Packets
@@ -77,21 +78,23 @@ object Listener {
                 Helper.logToConsole("&lcGame over! Reached wave &ly${Vars.state.wave}&lc with &ly${Vars.playerGroup.size()}&lc players online on map &ly${Vars.world.map.name()}&lc.")
 
             val map = Helper.nextMap(Vars.world.map)
-            Call.onInfoMessage("""
+            val msg = """
                 | ${if (Vars.state.rules.pvp) "[YELLOW] ${e.winner.name} 队胜利![]" else "[SCARLET]游戏结束![]"}
                 | 下一张地图为:[accent]${map.name()}[] By: [accent]${map.author()}[]
                 | 下一场游戏将在 ${Config.base.waitingTime.seconds} 秒后开始
-            """.trimMargin())
+            """.trimMargin()
+            Call.onInfoMessage(msg)
+            Helper.broadcast(msg, true)
             Helper.logToConsole("Next map is ${map.name()}")
             Main.timer.schedule(Config.base.waitingTime.toMillis()) {
                 Helper.loadMap(map)
             }
             //TODO 结算经验 And 排行榜系统
             RuntimeData.calTime()
-            RuntimeData.gameTime.filter { it.value < 5000 }.forEach{
+            RuntimeData.gameTime.filter { it.value < 5000 }.forEach {
                 RuntimeData.gameTime.remove(it.key) //Remove less than 5 second
             }
-            if(Vars.state.rules.pvp){
+            if (Vars.state.rules.pvp) {
                 //Remove loss Team
                 RuntimeData.gameTime.keys.filter { e.winner != RuntimeData.teams[it] }.forEach{
                     RuntimeData.gameTime.remove(it)
@@ -102,23 +105,35 @@ object Listener {
             builder.append("[yellow]总贡献时长: "+all/1000/60+"分钟\n")
             builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
-                val percent = String.format("%.2f",(it.value / all*100))
+                val percent = String.format("%.2f", (it.value / all * 100))
                 "[]" + playerData[it.key]!!.lastName + "[]([red]$percent%[])"
             }
             Helper.broadcast(builder.toString())
         }
-        Events.on(EventType.PlayerBanEvent::class.java){e->
+        //Kick player when banned
+        Events.on(EventType.PlayerBanEvent::class.java) { e ->
             e.player?.info?.lastKicked = Time.millis()
             e.player?.con?.kick(Packets.KickReason.banned)
         }
-        Events.on(ValidateException::class.java){e->
+        //Quit PVP mode when no player
+        Events.on(EventType.PlayerLeave::class.java) { e ->
+            if (!Vars.state.rules.pvp) return@on
+            Core.app.post {
+                if (!Vars.playerGroup.isEmpty) return@post
+                val next = Helper.nextMap()
+                //Prevent only PVP server
+                if (Helper.bestMode(next) == Gamemode.pvp) return@post
+                Helper.loadMap(next)
+            }
+        }
+        Events.on(ValidateException::class.java) { e ->
             Call.onWorldDataBegin(e.player.con)
             Vars.netServer.sendWorldData(e.player)
             e.player.sendMessage("[red]检验异常,自动同步")
         }
-        //PVP Control
-        var t=0
-        Events.on(EventType.Trigger.update){
+        //PVP Protect
+        var t = 0
+        Events.on(EventType.Trigger.update) {
             if (!RuntimeData.pvpProtect) return@on
             t = (t + 1) % 180
             if (t != 0) return@on //per 60ticks | 3 seconds
@@ -161,7 +176,7 @@ object Listener {
                 }
             if (e.message.startsWith('!') || e.message.startsWith('\\'))
                 Core.app.post {
-                    e.player.sendMessage("[yellow]本服插件为原创,请使用[red]/help[yellow]查看指令帮助")
+                    e.player.sendMessage("[yellow]本服插件为原创,指令均为/开头,使用[red]/help[yellow]查看指令帮助")
                 }
         }
     }
