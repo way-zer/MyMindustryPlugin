@@ -4,13 +4,10 @@ import arc.Core
 import arc.Events
 import arc.util.Time
 import cf.wayzer.mindustry.Data.playerData
-import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
 import mindustry.content.Blocks
-import mindustry.entities.type.Player
 import mindustry.game.EventType
 import mindustry.game.Gamemode
-import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.net.Packets
 import mindustry.net.ValidateException
@@ -26,44 +23,7 @@ object Listener {
     private val runtime = DBMaker.memoryDB().make()
     private val joinTime = runtime.hashMap("joinTime", Serializer.STRING_ASCII, Serializer.LONG).expireAfterGet().createOrOpen()
     private val onlineExp = runtime.hashMap("onlineExp", Serializer.STRING_ASCII, Serializer.INTEGER).expireAfterGet().createOrOpen()
-    // Data for one play(map)
-    object RuntimeData{
-        var startTime=0L
-        val beginTime = mutableMapOf<String,Long>()
-        val gameTime = mutableMapOf<String,Int>()
-        val teams = mutableMapOf<String, Team>()
-        val robots = mutableMapOf<String, Int>()
-        var pvpProtect = false
-        var protectDownTime:DownTime?=null
-        fun reset(players: Iterable<Player> = Vars.playerGroup.all()){
-            pvpProtect=false
-            protectDownTime?.cancel()
-            startTime = System.currentTimeMillis()
-            beginTime.clear()
-            gameTime.clear()
-            teams.clear()
-            robots.clear()
-            // 设置所有在场玩家时间
-            players.forEach {
-                beginTime[it.uuid] = System.currentTimeMillis()
-            }
-        }
 
-        fun calTime() {
-            beginTime.forEach { (uuid, start) ->
-                gameTime.merge(uuid, (System.currentTimeMillis() - start).toInt(), Int::plus)
-                beginTime[uuid] = System.currentTimeMillis()
-            }
-        }
-
-        /**
-         * ensure map don't change in last time
-         * @param time in millis
-         */
-        fun ensureNotChange(time: Int): Boolean {
-            return Time.millis() - startTime > time
-        }
-    }
     fun register() {
         registerGameControl()
         registerAboutPlayer()
@@ -96,13 +56,13 @@ object Listener {
             }
             if (Vars.state.rules.pvp) {
                 //Remove loss Team
-                RuntimeData.gameTime.keys.filter { e.winner != RuntimeData.teams[it] }.forEach{
+                RuntimeData.gameTime.keys.filter { e.winner != RuntimeData.teams[it] }.forEach {
                     RuntimeData.gameTime.remove(it)
                 }
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
             val builder = StringBuilder()
-            builder.append("[yellow]总贡献时长: "+all/1000/60+"分钟\n")
+            builder.append("[yellow]总贡献时长: " + all / 1000 / 60 + "分钟\n")
             builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
                 val percent = String.format("%.2f", (it.value / all * 100))
@@ -188,21 +148,23 @@ object Listener {
                 Helper.secureLog("ThoriumReactor", "${e.player.name} uses ThoriumReactor in danger|(${e.tile.x},${e.tile.y})")
             }
         }
-        Events.on(EventType.UnitCreateEvent::class.java){e->
-            if(e.unit.team == Vars.state.rules.waveTeam)return@on
-            when(Vars.unitGroup.count { it.team == e.unit.team }){
+        Events.on(EventType.UnitCreateEvent::class.java) { e ->
+            if (e.unit.team == Vars.state.rules.waveTeam) return@on
+            when (Vars.unitGroup.count { it.team == e.unit.team }) {
                 in Config.base.unitWarnRange ->
-                    Vars.playerGroup.all().forEach {
-                        if (it.team == e.unit.team) {
-                            it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿")
+                    if (RuntimeData.Intervals.UnitWarn())
+                        Vars.playerGroup.all().forEach {
+                            if (it.team == e.unit.team) {
+                                it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿")
+                            }
                         }
-                    }
                 in Config.base.unitWarnRange.last..10000 -> {
-                    Vars.playerGroup.all().forEach {
-                        if (it.team == e.unit.team) {
-                            it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成")
+                    if (RuntimeData.Intervals.UnitWarn())
+                        Vars.playerGroup.all().forEach {
+                            if (it.team == e.unit.team) {
+                                it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成")
+                            }
                         }
-                    }
                     e.unit.kill()
                 }
             }

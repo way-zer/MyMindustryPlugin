@@ -252,10 +252,10 @@ object ClientCommander {
         p.sendMessage("[yellow]该功能目前正处于实验阶段，有问题请立即与WayZer联系")
         if (state.rules.pvp)
             return p.sendMessage("[red]PVP模式禁止使用")
-        val now = Listener.RuntimeData.robots.getOrDefault(p.uuid, 0)
+        val now = RuntimeData.robots.getOrDefault(p.uuid, 0)
         if (now >= 2)
             return p.sendMessage("[red]目前一个玩家最多使用两个")
-        Listener.RuntimeData.robots[p.uuid] = now + 1
+        RuntimeData.robots[p.uuid] = now + 1
         try {
             UnitBuilder.createForPlayer(p)
         } catch (e: Exception) {

@@ -28,15 +28,15 @@ object Helper {
         Core.app.post {//After reset And Load
             when(mode){
                 Gamemode.pvp->{
-                    Listener.RuntimeData.protectDownTime = DownTime(Main.timer, Config.base.pvpProtectTime.toMillis(), {
-                        Listener.RuntimeData.pvpProtect = true
+                    RuntimeData.protectDownTime = DownTime(Main.timer, Config.base.pvpProtectTime.toMillis(), {
+                        RuntimeData.pvpProtect = true
                         broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + TimeUnit.MILLISECONDS.toMinutes(Config.base.pvpProtectTime.toMinutes()) + "分钟)")
                     }, {
                         if (Vars.world.map != map) return@DownTime false
                         Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟", 10f)
                         return@DownTime true
                     }, {
-                        Listener.RuntimeData.pvpProtect = false
+                        RuntimeData.pvpProtect = false
                         broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
                     }).apply(DownTime::start)
                 }
@@ -130,7 +130,7 @@ object Helper {
             val players = Vars.playerGroup.all().toList()
             players.forEach { it.dead = true }
             callBack()
-            Listener.RuntimeData.reset(players)
+            RuntimeData.reset(players)
             Call.onWorldDataBegin()
             players.forEach {
                 if (it.con == null) return@forEach
@@ -156,11 +156,11 @@ object Helper {
     private class MyAssigner(private val old:NetServer.TeamAssigner):NetServer.TeamAssigner{
         override fun assign(player: Player, p1: MutableIterable<Player>): Team {
             if (!Vars.state.rules.pvp) return Vars.state.rules.defaultTeam
-            return Listener.RuntimeData.teams.getOrPut(player.uuid){
+            return RuntimeData.teams.getOrPut(player.uuid) {
                 //not use old,because it may assign to team without core
                 val teams = Vars.state.teams.active.filter { it.hasCore() }
                 teams.shuffled()
-                teams.minBy { p1.count { p-> p.team==it.team&&player!=p } }!!.team
+                teams.minBy { p1.count { p -> p.team == it.team && player != p } }!!.team
             }
         }
     }

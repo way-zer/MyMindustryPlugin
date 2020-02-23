@@ -1,7 +1,7 @@
 package cf.wayzer.mindustry.expr
 
-import cf.wayzer.mindustry.Listener
 import cf.wayzer.mindustry.Main
+import cf.wayzer.mindustry.RuntimeData
 import mindustry.Vars
 import mindustry.content.UnitTypes
 import mindustry.entities.type.BaseUnit
@@ -46,7 +46,7 @@ class UnitBuilder(private val bindPlayer: Player) : BuilderDrone() {
         super.onDeath()
         bindPlayer.sendMessage("[yellow]建筑机将在一分钟后复活")
         Main.timer.schedule(60 * 1000L) {
-            if (bindPlayer.con != null && Listener.RuntimeData.ensureNotChange(60 * 1000))
+            if (bindPlayer.con != null && RuntimeData.ensureNotChange(60 * 1000))
                 createForPlayer(bindPlayer)
         }
     }
