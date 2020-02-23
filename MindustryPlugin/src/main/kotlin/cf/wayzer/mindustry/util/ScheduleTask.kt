@@ -12,6 +12,7 @@ open class ScheduleTask<T : Any>(val task: ScheduleTask<T>.(first: Boolean) -> D
     //Any data you want save
     lateinit var data: T
 
+    @Suppress("UNUSED_PARAMETER")
     private fun run(that: TimerTask) {
         timerTask = Main.timer.schedule(task(false) ?: let { return cancel() }, ::run)
     }

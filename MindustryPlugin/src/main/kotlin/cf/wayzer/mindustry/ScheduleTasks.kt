@@ -23,7 +23,7 @@ object ScheduleTasks {
     val alertTask = ScheduleTask<Int> { firstRun ->
         if (firstRun) {
             data = 0
-        } else {
+        } else if (!Config.base.alerts.isEmpty()) {
             data %= Config.base.alerts.size
             val msg = Config.base.alerts[data]
             if (Config.base.alertUseToast)

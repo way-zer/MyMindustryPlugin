@@ -27,7 +27,7 @@ object Helper {
         Core.app.post {//After reset And Load
             when(mode){
                 Gamemode.pvp->{
-                    RuntimeData.protectDownTime = DownTime(Main.timer, Config.base.pvpProtectTime.toMillis(), {
+                    RuntimeData.protectDownTime = DownTime(Config.base.pvpProtectTime.toMillis(), {
                         RuntimeData.pvpProtect = true
                         broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + Config.base.pvpProtectTime.toMinutes() + "分钟)")
                     }, {

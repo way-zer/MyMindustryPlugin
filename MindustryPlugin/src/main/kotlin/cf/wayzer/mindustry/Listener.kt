@@ -76,7 +76,7 @@ object Listener {
             e.player?.con?.kick(Packets.KickReason.banned)
         }
         //Quit PVP mode when no player
-        Events.on(EventType.PlayerLeave::class.java) { e ->
+        Events.on(EventType.PlayerLeave::class.java) { _ ->
             if (!Vars.state.rules.pvp) return@on
             Core.app.post {
                 if (!Vars.playerGroup.isEmpty) return@post
