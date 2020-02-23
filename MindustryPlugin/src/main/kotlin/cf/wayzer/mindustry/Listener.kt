@@ -62,7 +62,7 @@ object Listener {
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
             val builder = StringBuilder()
-            builder.append("[yellow]总贡献时长: " + all / 1000 / 60 + "分钟\n")
+            builder.append("[yellow]总贡献时长: " + String.format("%0.2f", all / 1000 / 60) + "分钟\n")
             builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
                 val percent = String.format("%.2f", (it.value / all * 100))
@@ -155,14 +155,14 @@ object Listener {
                     if (RuntimeData.Intervals.UnitWarn())
                         Vars.playerGroup.all().forEach {
                             if (it.team == e.unit.team) {
-                                it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿")
+                                Call.onInfoToast(it.con, "[yellow]警告: 建筑过多单位,可能造成服务器卡顿", 6f)
                             }
                         }
                 in Config.base.unitWarnRange.last..10000 -> {
                     if (RuntimeData.Intervals.UnitWarn())
                         Vars.playerGroup.all().forEach {
                             if (it.team == e.unit.team) {
-                                it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成")
+                                Call.onInfoToast(it.con, "[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成", 6f)
                             }
                         }
                     e.unit.kill()

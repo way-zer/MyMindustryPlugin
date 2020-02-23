@@ -5,35 +5,18 @@ import arc.util.CommandHandler
 import cf.wayzer.libraryManager.Dependency
 import cf.wayzer.libraryManager.LibraryManager
 import cf.wayzer.mindustry.util.IntRangeReader
-import mindustry.Vars
-import mindustry.core.GameState
-import mindustry.io.SaveIO
 import mindustry.plugin.Plugin
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.schedule
 
 class Main : Plugin() {
     override fun init() {
         IntRangeReader.register()
         Config.load()
-        Listener.register()
         hackServerControl()
         Helper.setTeamAssigner()
-        timer.schedule(Config.nextSaveTime, ::autoSave)
-    }
-
-    private fun autoSave(that: TimerTask) {
-        if (Vars.state.`is`(GameState.State.playing)) {
-            val minute = ((that.scheduledExecutionTime() / TimeUnit.MINUTES.toMillis(1)) % 60).toInt() //Get the minute
-            Core.app.post {
-                val id = Config.vote.savesRange.first + minute / 10
-                SaveIO.save(SaveIO.fileFor(id))
-                Helper.broadcast("[green]自动存档完成(10分钟一次),存档号 [red]$id")
-            }
-        }
-        timer.schedule(Config.nextSaveTime, ::autoSave)
+        Listener.register()
+        ScheduleTasks.allStart()
     }
 
     override fun registerServerCommands(handler: CommandHandler) {

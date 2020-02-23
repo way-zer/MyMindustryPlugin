@@ -29,7 +29,8 @@ object ServerCommander {
     private fun onMaps(arg: Array<String>) {
         val mode:Gamemode? = arg.getOrNull(0).let {
             when {
-                "pvp".equals(it,true) -> Gamemode.pvp
+                !Config.base.mapsDistinguishMode -> null
+                "pvp".equals(it, true) -> Gamemode.pvp
                 "attack".equals(it,true) -> Gamemode.attack
                 "all".equals(it,true) -> null
                 else -> Gamemode.survival

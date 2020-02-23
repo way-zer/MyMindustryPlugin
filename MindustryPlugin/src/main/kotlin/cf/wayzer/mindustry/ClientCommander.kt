@@ -173,8 +173,9 @@ object ClientCommander {
 
     @Suppress("DuplicatedCode")
     private fun onMaps(arg: Array<String>, player: Player) {
-        val mode:Gamemode? = arg.getOrNull(0).let {
+        val mode: Gamemode? = arg.getOrNull(0).let {
             when {
+                !Config.base.mapsDistinguishMode -> null
                 "pvp".equals(it, true) -> Gamemode.pvp
                 "attack".equals(it, true) -> Gamemode.attack
                 "all".equals(it, true) -> null
@@ -182,7 +183,8 @@ object ClientCommander {
             }
         }
         val page = arg.lastOrNull()?.toIntOrNull() ?: 1
-        player.sendMessage("[yellow]默认只显示所有生存图,输入[green]/maps pvp[yellow]显示pvp图,[green]/maps attack[yellow]显示攻城图[green]/maps all[yellow]显示所有")
+        if (Config.base.mapsDistinguishMode)
+            player.sendMessage("[yellow]默认只显示所有生存图,输入[green]/maps pvp[yellow]显示pvp图,[green]/maps attack[yellow]显示攻城图[green]/maps all[yellow]显示所有")
         player.sendMessage(Helper.listMap(page, mode))
     }
 

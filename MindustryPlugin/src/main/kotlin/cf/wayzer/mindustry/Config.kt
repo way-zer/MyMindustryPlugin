@@ -39,7 +39,11 @@ object Config {
             //下一轮等待时间
             val waitingTime: Duration = Duration.ofSeconds(10),
             val pvpProtectTime: Duration = Duration.ofMinutes(10),
-            val enableInternMaps: Boolean = false
+            val enableInternMaps: Boolean = false,
+            val mapsDistinguishMode: Boolean = true,
+            val alertTime: Duration = Duration.ofMinutes(20),
+            val alertUseToast: Boolean = false,
+            val alerts: List<String> = listOf()
     )
 
     data class VoteConfig(
