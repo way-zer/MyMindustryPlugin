@@ -75,6 +75,7 @@ object Helper {
         if (page > totalPage) page = totalPage
         val text = StringBuilder()
         text.append("[green]===[white] 服务器地图 [green]===\n")
+        text.append("  [green]插件作者:[yellow]wayZer\n")
         maps.forEachIndexed { index, pair ->
             //pair: id,map
             if (index in prePage * (page - 1) until prePage * page) {
