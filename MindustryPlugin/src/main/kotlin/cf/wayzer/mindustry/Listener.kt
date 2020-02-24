@@ -62,7 +62,7 @@ object Listener {
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
             val builder = StringBuilder()
-            builder.append("[yellow]总贡献时长: " + String.format("%0.2f", all / 1000 / 60) + "分钟\n")
+            builder.append("[yellow]总贡献时长: " + String.format("%.2f", all / 1000 / 60) + "分钟\n")
             builder.append("[yellow]贡献度排名(目前根据时间): ")
             RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
                 val percent = String.format("%.2f", (it.value / all * 100))
