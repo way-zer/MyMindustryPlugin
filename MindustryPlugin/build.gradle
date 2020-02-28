@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
     shadow 'cf.wayzer:LibraryManager:1.3'
-    shadow 'cf.wayzer:i18nLibrary:1.0-Beta'
+    shadow 'cf.wayzer:i18nLibrary:1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.mapdb:mapdb:$mapdbVersion"
     implementation "io.github.config4k:config4k:0.4.2"
