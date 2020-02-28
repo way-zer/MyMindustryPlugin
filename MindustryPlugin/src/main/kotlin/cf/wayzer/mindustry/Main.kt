@@ -11,6 +11,7 @@ import java.util.*
 
 class Main : Plugin() {
     override fun init() {
+        I18nHelper.init()
         IntRangeReader.register()
         Config.load()
         hackServerControl()

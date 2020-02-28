@@ -3,7 +3,9 @@ package cf.wayzer.mindustry
 import arc.Core
 import arc.Events
 import arc.util.Time
+import cf.wayzer.i18n.I18nApi.i18n
 import cf.wayzer.mindustry.Data.playerData
+import cf.wayzer.mindustry.I18nHelper.sendMessage
 import mindustry.Vars
 import mindustry.content.Blocks
 import mindustry.game.EventType
@@ -38,13 +40,15 @@ object Listener {
                 Helper.logToConsole("&lcGame over! Reached wave &ly${Vars.state.wave}&lc with &ly${Vars.playerGroup.size()}&lc players online on map &ly${Vars.world.map.name()}&lc.")
 
             val map = Helper.nextMap(Vars.world.map)
+            val winnerMsg: Any = if (Vars.state.rules.pvp) "[YELLOW] {team.colorizeName} 队胜利![]".i18n("_team" to e.winner) else ""
             val msg = """
-                | ${if (Vars.state.rules.pvp) "[YELLOW] ${e.winner.name} 队胜利![]" else "[SCARLET]游戏结束![]"}
-                | 下一张地图为:[accent]${map.name()}[] By: [accent]${map.author()}[]
-                | 下一场游戏将在 ${Config.base.waitingTime.seconds} 秒后开始
-            """.trimMargin()
-            Call.onInfoMessage(msg)
-            Helper.broadcast(msg, true)
+                | [SCARLET]游戏结束![]"
+                | {winnerMsg}
+                | 下一张地图为:[accent]{map.name}[] By: [accent]{map.author}[]
+                | 下一场游戏将在 {waitTime} 秒后开始
+            """.trimMargin().i18n("winnerMsg" to winnerMsg, "waitTime" to Config.base.waitingTime.seconds)
+            Helper.broadcast(msg, I18nHelper.MsgType.InfoToast, quite = true)
+            Helper.broadcast(msg, I18nHelper.MsgType.Message, quite = true)
             Helper.logToConsole("Next map is ${map.name()}")
             Main.timer.schedule(Config.base.waitingTime.toMillis()) {
                 Helper.loadMap(map)
@@ -61,14 +65,18 @@ object Listener {
                 }
             }
             val all = RuntimeData.gameTime.values.sum().toDouble()
-            val builder = StringBuilder()
-            builder.append("[yellow]总贡献时长: " + String.format("%.2f", all / 1000 / 60) + "分钟\n")
-            builder.append("[yellow]贡献度排名(目前根据时间): ")
-            RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinTo(builder) {
+            val list = RuntimeData.gameTime.entries.sortedByDescending { it.value }.joinToString {
                 val percent = String.format("%.2f", (it.value / all * 100))
-                "[]" + playerData[it.key]!!.lastName + "[]([red]$percent%[])"
+                val info = playerData[it.key]!!
+                "[]{player.name}[]([red]{percent}%,{gameTime} min[]),"
+                        .i18n("percent" to percent, "gameTime" to it.value / 1000 / 60,
+                                "_info" to info, "_lang" to info.lang)
+                        .toString()
             }
-            Helper.broadcast(builder.toString())
+            Helper.broadcast("""
+                |[yellow]总贡献时长: {allTime}分钟
+                |[yellow]贡献度排名(目前根据时间): {list}
+            """.trimMargin().i18n("allTime" to String.format("%.2f", all / 1000 / 60), "list" to list))
         }
         //Kick player when banned
         Events.on(EventType.PlayerBanEvent::class.java) { e ->
@@ -89,7 +97,7 @@ object Listener {
         Events.on(ValidateException::class.java) { e ->
             Call.onWorldDataBegin(e.player.con)
             Vars.netServer.sendWorldData(e.player)
-            e.player.sendMessage("[red]检验异常,自动同步")
+            e.player.sendMessage("[red]检验异常,自动同步".i18n())
         }
         //PVP Protect
         var t = 0
@@ -99,7 +107,7 @@ object Listener {
             if (t != 0) return@on //per 60ticks | 3 seconds
             Vars.playerGroup.forEach {
                 if (it.isShooting && Vars.state.teams.closestEnemyCore(it.pointerX, it.pointerY, it.team)?.withinDst(it, Vars.state.rules.enemyCoreBuildRadius) == true) {
-                    it.sendMessage("[red]PVP保护时间,禁止在其他基地攻击")
+                    it.sendMessage("[red]PVP保护时间,禁止在其他基地攻击".i18n())
                     it.kill()
                 }
             }
@@ -109,7 +117,11 @@ object Listener {
     private fun registerAboutPlayer() {
         Events.on(EventType.PlayerJoin::class.java) { e ->
             lastJoin = System.currentTimeMillis()
-            Call.onInfoToast(e.player.con, Config.base.welcome, 30f)
+            e.player.sendMessage("""
+                |Welcome to this Server
+                |[green]欢迎{player.name}[green]来到本服务器[]
+                |[yellow]本提示请到语言文件内修改
+            """.trimMargin().i18n(), I18nHelper.MsgType.InfoToast, 30f)
             VoteHandler.handleJoin(e.player)
             val data = playerData[e.player.uuid] ?: let {
                 Data.PlayerData(
@@ -136,7 +148,7 @@ object Listener {
                 }
             if (e.message.startsWith('!') || e.message.startsWith('\\'))
                 Core.app.post {
-                    e.player.sendMessage("[yellow]本服插件为原创,指令均为/开头,使用[red]/help[yellow]查看指令帮助")
+                    e.player.sendMessage("[yellow]本服插件为原创,指令均为/开头,使用[red]/help[yellow]查看指令帮助".i18n())
                 }
         }
     }
@@ -144,25 +156,26 @@ object Listener {
     private fun registerReGrief() {
         Events.on(EventType.DepositEvent::class.java) { e ->
             if (e.tile.block() == Blocks.thoriumReactor && e.tile.ent<NuclearReactor.NuclearReactorEntity>().liquids.total() < 0.05) {
-                Helper.broadcast("[red][WARNING!][yellow]${e.player.name}正在进行危险行为(${e.tile.x},${e.tile.y})!")
+                Helper.broadcast("[red][WARNING!][yellow]{player.name}正在进行危险行为{pos}!"
+                        .i18n("_player" to e.player, "pos" to "(${e.tile.x},${e.tile.y})"))
                 Helper.secureLog("ThoriumReactor", "${e.player.name} uses ThoriumReactor in danger|(${e.tile.x},${e.tile.y})")
             }
         }
         Events.on(EventType.UnitCreateEvent::class.java) { e ->
             if (e.unit.team == Vars.state.rules.waveTeam) return@on
-            when (Vars.unitGroup.count { it.team == e.unit.team }) {
+            when (val count = Vars.unitGroup.count { it.team == e.unit.team }) {
                 in Config.base.unitWarnRange ->
                     if (RuntimeData.Intervals.UnitWarn())
                         Vars.playerGroup.all().forEach {
                             if (it.team == e.unit.team) {
-                                Call.onInfoToast(it.con, "[yellow]警告: 建筑过多单位,可能造成服务器卡顿", 6f)
+                                it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿,当前: {count}".i18n("count" to count), I18nHelper.MsgType.InfoToast, 6f)
                             }
                         }
                 in Config.base.unitWarnRange.last..10000 -> {
                     if (RuntimeData.Intervals.UnitWarn())
                         Vars.playerGroup.all().forEach {
                             if (it.team == e.unit.team) {
-                                Call.onInfoToast(it.con, "[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成", 6f)
+                                it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成".i18n("count" to count), I18nHelper.MsgType.InfoToast, 6f)
                             }
                         }
                     e.unit.kill()

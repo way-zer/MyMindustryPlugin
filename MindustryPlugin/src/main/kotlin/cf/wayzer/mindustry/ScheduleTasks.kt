@@ -1,10 +1,10 @@
 package cf.wayzer.mindustry
 
 import arc.Core
+import cf.wayzer.i18n.I18nApi.i18n
 import cf.wayzer.mindustry.util.ScheduleTask
 import mindustry.Vars
 import mindustry.core.GameState
-import mindustry.gen.Call
 import mindustry.io.SaveIO
 import java.util.concurrent.TimeUnit
 
@@ -15,7 +15,7 @@ object ScheduleTasks {
             Core.app.post {
                 val id = Config.vote.savesRange.first + minute / 10
                 SaveIO.save(SaveIO.fileFor(id))
-                Helper.broadcast("[green]自动存档完成(10分钟一次),存档号 [red]$id")
+                Helper.broadcast("[green]自动存档完成(10分钟一次),存档号 [red]{id}".i18n("id" to id))
             }
         }
         return@ScheduleTask Config.nextSaveTime
@@ -23,13 +23,13 @@ object ScheduleTasks {
     val alertTask = ScheduleTask<Int> { firstRun ->
         if (firstRun) {
             data = 0
-        } else if (!Config.base.alerts.isEmpty()) {
+        } else if (Config.base.alerts.isNotEmpty()) {
             data %= Config.base.alerts.size
             val msg = Config.base.alerts[data]
             if (Config.base.alertUseToast)
-                Call.onInfoToast(msg, 15f)
+                Helper.broadcast(msg.i18n(), I18nHelper.MsgType.InfoToast, 15f)
             else
-                Helper.broadcast(msg, true)
+                Helper.broadcast(msg.i18n(), I18nHelper.MsgType.Message, 15f)
             data++
         }
         return@ScheduleTask Config.base.alertTime.delayToDate()

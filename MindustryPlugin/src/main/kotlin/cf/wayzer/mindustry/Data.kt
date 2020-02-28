@@ -15,7 +15,8 @@ object Data {
             val lastAddress: String,
             val playedTime: Int,
             val level: Int,
-            val exp: Int
+            val exp: Int,
+            val selectedLang: String? = null
     ) : Serializable {
         fun getMaxExp(level: Int = this.level) = (level.toDouble().pow(1.5) * 1000).toInt()
         fun addPlayedTime(addTime: Int) = copy(playedTime = playedTime + addTime)
@@ -24,9 +25,21 @@ object Data {
             var level = this.level
             while (exp >= getMaxExp(level)) {
                 exp -= getMaxExp(level)
-                level++;
+                level++
             }
             return copy(exp = exp, level = level)
+        }
+
+        val lang: String
+            get() {
+                if (selectedLang == null || !Config.base.allLang.contains(selectedLang))
+                    return Config.base.defaultLang
+                return selectedLang
+            }
+
+        companion object {
+            @JvmStatic
+            private val serialVersionUID = -1823529285823858212L
         }
     }
 

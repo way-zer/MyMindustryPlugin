@@ -30,10 +30,6 @@ object Config {
     val pluginLog: Fi = Vars.dataDirectory.child("logs").child("PluginLog.log")
 
     data class GameConfig(
-            val welcome: String = """
-        |Welcome to this Server
-        |[green]欢迎来到本服务器[]
-        """.trimMargin(),
             //单位警告数量,超出将阻止生成
             val unitWarnRange: IntRange = 150 until 220,
             //下一轮等待时间
@@ -43,7 +39,9 @@ object Config {
             val mapsDistinguishMode: Boolean = true,
             val alertTime: Duration = Duration.ofMinutes(20),
             val alertUseToast: Boolean = false,
-            val alerts: List<String> = listOf()
+            val alerts: List<String> = listOf(),
+            val defaultLang: String = "custom",
+            val allLang: List<String> = listOf("custom")
     )
 
     data class VoteConfig(

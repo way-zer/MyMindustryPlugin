@@ -4,6 +4,9 @@ import arc.Core
 import arc.files.Fi
 import arc.util.ColorCodes
 import arc.util.Log
+import cf.wayzer.i18n.I18nApi.i18n
+import cf.wayzer.i18n.I18nSentence
+import cf.wayzer.mindustry.I18nHelper.sendMessage
 import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
 import mindustry.core.NetServer
@@ -16,6 +19,7 @@ import mindustry.maps.Map
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
+import kotlin.math.min
 
 object Helper {
     fun loadMap(map: Map = nextMap(), mode: Gamemode = bestMode(map)) {
@@ -24,22 +28,23 @@ object Helper {
             Vars.state.rules = Vars.world.map.applyRules(mode)
             Vars.logic.play()
         }
-        Core.app.post {//After reset And Load
-            when(mode){
-                Gamemode.pvp->{
+        Core.app.post {
+            //After reset And Load
+            when (mode) {
+                Gamemode.pvp -> {
                     RuntimeData.protectDownTime = DownTime(Config.base.pvpProtectTime.toMillis(), {
                         RuntimeData.pvpProtect = true
-                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续" + Config.base.pvpProtectTime.toMinutes() + "分钟)")
+                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续{timeMin}分钟)".i18n("timeMin" to Config.base.pvpProtectTime.toMinutes()))
                     }, {
                         if (Vars.world.map != map) return@DownTime false
-                        Call.onInfoToast("[yellow]PVP保护时间还剩 $it 分钟", 10f)
+                        broadcast("[yellow]PVP保护时间还剩 {timeMin} 分钟".i18n("timeMin" to it), I18nHelper.MsgType.InfoToast, 10f)
                         return@DownTime true
                     }, {
                         RuntimeData.pvpProtect = false
-                        broadcast("[yellow]PVP保护时间已结束, 全力进攻吧")
+                        broadcast("[yellow]PVP保护时间已结束, 全力进攻吧".i18n())
                     }).apply(DownTime::start)
                 }
-                else->return@post
+                else -> return@post
             }
         }
     }
@@ -51,21 +56,20 @@ object Helper {
         }
     }
 
-    fun listBackup(): String {
-        val text = StringBuilder()
-        text.append("[green]===[white] 自动存档 [green]===\n")
+    fun listBackup(): I18nSentence {
         val dataFormat = SimpleDateFormat("hh:mm")
-        Config.vote.savesRange.forEach {
-            val file = SaveIO.fileFor(it)
-            if (file.exists()) {
-                text.append("  [red]$it[]: [yellow]Save on ${dataFormat.format(Date(file.lastModified()))}\n")
-            }
+        val list = Config.vote.savesRange.filter { SaveIO.fileFor(it).exists() }.map {
+            "[red]{id}[]: [yellow]Save on {file.date}".i18n("id" to it,
+                    "file.date" to dataFormat.format(Date(SaveIO.fileFor(it).lastModified())))
         }
-        text.append("[green]===[white] 100-105 [green]===")
-        return text.toString()
+        return """
+            |[green]===[white] 自动存档 [green]===
+            |{list}
+            |[green]===[white] {range} [green]===
+        """.trimMargin().i18n("range" to Config.vote.savesRange, "list" to list)
     }
 
-    fun listMap(p: Int,mode: Gamemode?= Gamemode.survival): String {
+    fun listMap(p: Int, mode: Gamemode? = Gamemode.survival): I18nSentence {
         val prePage = 7
         val maps = Config.maps.mapIndexed { index, map -> (index + 1) to map }
                 .filter { mode == null || bestMode(it.second) == mode }
@@ -73,19 +77,15 @@ object Helper {
         var page = p
         if (page < 1) page = 1
         if (page > totalPage) page = totalPage
-        val text = StringBuilder()
-        text.append("[green]===[white] 服务器地图 [green]===\n")
-        text.append("  [green]插件作者:[yellow]wayZer\n")
-        maps.forEachIndexed { index, pair ->
-            //pair: id,map
-            if (index in prePage * (page - 1) until prePage * page) {
-                with(pair.second) {
-                    text.append("[red]%2d[green](%d,%d)[]:[yellow]%s[]\t | [blue]%s\n".format(pair.first, width, height, file.file().nameWithoutExtension, name()))
-                }
-            }
+        val list = maps.subList(prePage * (page - 1), min(maps.size, prePage * page)).map { (id, map) ->
+            "[red]{id}[green]({map.width},{map.height})[]:[yellow]{map.fileName}[] | [blue]{map.name}".i18n("id" to "%2d".format(id), "_map" to map)
         }
-        text.append("[green]===[white] $page/$totalPage [green]===")
-        return text.toString()
+        return """
+            |[green]===[white] 服务器地图 [green]===
+            |  [green]插件作者:[yellow]wayZer
+            |  {list}
+            |[green]===[white] {page}/{totalPage} [green]===
+        """.trimMargin().i18n("list" to list, "page" to page, "totalPage" to totalPage)
     }
 
     fun logToConsole(text: String) {
@@ -98,17 +98,14 @@ object Helper {
         Log.info(replaced)
     }
 
-    fun broadcast(message: String, quite: Boolean = false) {
-        Main.timer.run {
-            if (!quite) logToConsole("[Broadcast]$message")
-            Vars.playerGroup.all().forEach {
-                if (it.con != null)
-                    it.sendMessage(message)
-            }
+    fun broadcast(message: I18nSentence, type: I18nHelper.MsgType = I18nHelper.MsgType.Message, time: Float = 10f, quite: Boolean = false) {
+        if (!quite) logToConsole("[Broadcast]$message")
+        Vars.playerGroup.all().forEach {
+            it.sendMessage(message, type, time)
         }
     }
 
-    fun nextMap(map: Map? = null,mode: Gamemode = Gamemode.survival): Map {
+    fun nextMap(map: Map? = null, mode: Gamemode = Gamemode.survival): Map {
         val maps = Config.maps.copy()
         maps.shuffle()
         return maps.filter { bestMode(it) == mode }.firstOrNull { it != map } ?: maps[0]
@@ -136,7 +133,7 @@ object Helper {
                 if (it.con == null) return@forEach
                 it.reset()
                 if (Vars.state.rules.pvp)
-                    it.team = Vars.netServer.assignTeam(it,players)
+                    it.team = Vars.netServer.assignTeam(it, players)
                 Vars.netServer.sendWorldData(it)
             }
         }
@@ -144,16 +141,16 @@ object Helper {
 
     fun secureLog(tag: String, text: String) {
         logToConsole("[yellow]$text")
-        Config.pluginLog.writeString("[$tag][${Date()}] $text\n",true)
+        Config.pluginLog.writeString("[$tag][${Date()}] $text\n", true)
     }
 
-    fun setTeamAssigner(){
+    fun setTeamAssigner() {
         val old = Vars.netServer.assigner
-        if(old !is MyAssigner)
-            Vars.netServer.assigner=MyAssigner(old)
+        if (old !is MyAssigner)
+            Vars.netServer.assigner = MyAssigner(old)
     }
 
-    private class MyAssigner(private val old:NetServer.TeamAssigner):NetServer.TeamAssigner{
+    private class MyAssigner(private val old: NetServer.TeamAssigner) : NetServer.TeamAssigner {
         override fun assign(player: Player, p1: MutableIterable<Player>): Team {
             if (!Vars.state.rules.pvp) return Vars.state.rules.defaultTeam
             return RuntimeData.teams.getOrPut(player.uuid) {

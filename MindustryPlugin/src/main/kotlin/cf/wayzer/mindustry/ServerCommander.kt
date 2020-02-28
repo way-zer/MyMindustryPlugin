@@ -1,6 +1,7 @@
 package cf.wayzer.mindustry
 
 import arc.util.CommandHandler
+import cf.wayzer.i18n.I18nApi
 import cf.wayzer.mindustry.Data.playerData
 import mindustry.Vars
 import mindustry.Vars.playerGroup
@@ -22,22 +23,25 @@ object ServerCommander {
         handler.register("mInfo", "<uuid>", "Show Player info", ::onInfo)
         handler.register("mBans", "", "List bans", ::onBans)
         handler.register("mAdmin", "[uuid]", "List or Toggle admin", ::onAdmin)
-        handler.register("reloadConfig", "reload plugin config") { Config.load() }
+        handler.register("reloadConfig", "reload plugin config") {
+            Config.load()
+            I18nApi.resetCache()
+        }
     }
 
     @Suppress("DuplicatedCode")
     private fun onMaps(arg: Array<String>) {
-        val mode:Gamemode? = arg.getOrNull(0).let {
+        val mode: Gamemode? = arg.getOrNull(0).let {
             when {
                 !Config.base.mapsDistinguishMode -> null
                 "pvp".equals(it, true) -> Gamemode.pvp
-                "attack".equals(it,true) -> Gamemode.attack
-                "all".equals(it,true) -> null
+                "attack".equals(it, true) -> Gamemode.attack
+                "all".equals(it, true) -> null
                 else -> Gamemode.survival
             }
         }
         val page = arg.lastOrNull()?.toIntOrNull() ?: 1
-        Helper.logToConsole(Helper.listMap(page,mode))
+        Helper.logToConsole(Helper.listMap(page, mode).toString())
     }
 
     private fun onChange(arg: Array<String>) {
