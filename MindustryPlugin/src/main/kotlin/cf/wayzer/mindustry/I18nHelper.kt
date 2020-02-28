@@ -17,13 +17,15 @@ object I18nHelper {
     }
 
     private fun registerVar(name: String, f: (loadOther: (String) -> Any?) -> Any?) {
-        I18nApi.registerGlobalVal(name, f as PlaceHoldHandler)
+        I18nApi.registerGlobalVal(name, object : PlaceHoldHandler {
+            override fun handle(getOther: (String) -> Any?): Any? = f(getOther)
+        })
     }
 
-    fun I18nSentence.bindForPlayer(p: Player): I18nSentence {
+    private fun I18nSentence.bindForPlayer(p: Player): I18nSentence {
         val info = Data.playerData[p.uuid]!!
         addVars(
-                "_player" to this,
+                "_player" to p,
                 "_player._info" to info,
                 "_lang" to info.lang
         )

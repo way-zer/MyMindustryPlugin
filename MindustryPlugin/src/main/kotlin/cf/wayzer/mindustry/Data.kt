@@ -38,8 +38,7 @@ object Data {
             }
 
         companion object {
-            @JvmStatic
-            private val serialVersionUID = -1823529285823858212L
+            private const val serialVersionUID = -1823529285823858212L
         }
     }
 

@@ -120,7 +120,7 @@ object Listener {
             e.player.sendMessage("""
                 |Welcome to this Server
                 |[green]欢迎{player.name}[green]来到本服务器[]
-                |[yellow]本提示请到语言文件内修改
+                |[yellow]请config下建立lang/lang-custom.lang以修改本提示
             """.trimMargin().i18n(), I18nHelper.MsgType.InfoToast, 30f)
             VoteHandler.handleJoin(e.player)
             val data = playerData[e.player.uuid] ?: let {

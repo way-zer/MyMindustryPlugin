@@ -59,14 +59,14 @@ object Helper {
     fun listBackup(): I18nSentence {
         val dataFormat = SimpleDateFormat("hh:mm")
         val list = Config.vote.savesRange.filter { SaveIO.fileFor(it).exists() }.map {
-            "[red]{id}[]: [yellow]Save on {file.date}".i18n("id" to it,
+            "[red]{id}[]: [yellow]Save on {file.date}\n".i18n("id" to it,
                     "file.date" to dataFormat.format(Date(SaveIO.fileFor(it).lastModified())))
         }
         return """
             |[green]===[white] 自动存档 [green]===
             |{list}
             |[green]===[white] {range} [green]===
-        """.trimMargin().i18n("range" to Config.vote.savesRange, "list" to list)
+        """.trimMargin().i18n("range" to Config.vote.savesRange.toString(), "list" to list)
     }
 
     fun listMap(p: Int, mode: Gamemode? = Gamemode.survival): I18nSentence {
@@ -78,12 +78,12 @@ object Helper {
         if (page < 1) page = 1
         if (page > totalPage) page = totalPage
         val list = maps.subList(prePage * (page - 1), min(maps.size, prePage * page)).map { (id, map) ->
-            "[red]{id}[green]({map.width},{map.height})[]:[yellow]{map.fileName}[] | [blue]{map.name}".i18n("id" to "%2d".format(id), "_map" to map)
+            "[red]{id}[green]({map.width},{map.height})[]:[yellow]{map.fileName}[] | [blue]{map.name}\n".i18n("id" to "%2d".format(id), "_map" to map)
         }
         return """
             |[green]===[white] 服务器地图 [green]===
             |  [green]插件作者:[yellow]wayZer
-            |  {list}
+            |{list}
             |[green]===[white] {page}/{totalPage} [green]===
         """.trimMargin().i18n("list" to list, "page" to page, "totalPage" to totalPage)
     }
