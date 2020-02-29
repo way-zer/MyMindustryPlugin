@@ -66,7 +66,7 @@ object I18nHelper {
         registerVar("player.playedTime") { (it("_player._info") as? Data.PlayerData)?.playedTime?.div(60) }
         registerVar("player.level") { (it("_player._info") as? Data.PlayerData)?.level }
         registerVar("player.exp") { (it("_player._info") as? Data.PlayerData)?.exp }
-        registerVar("player.level") { (it("_player._info") as? Data.PlayerData)?.getMaxExp() }
+        registerVar("player.maxExp") { (it("_player._info") as? Data.PlayerData)?.getMaxExp() }
         registerVar("_team") { (it("_player") as? Player)?.team }
         registerVar("team.name") { (it("_team") as? Team)?.name }
         registerVar("team.color") { (it("_team") as? Team)?.let { "[#${it.color}]" } }

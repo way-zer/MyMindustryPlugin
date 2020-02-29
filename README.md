@@ -42,13 +42,43 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - /mInfo <UUID> 显示玩家统计信息
 - /addExp <playerId> <num> 增加玩家经验(暂无多用,用户等级系统正在计划中)
 - /reloadConfig 重载配置文件
+#### 翻译内支持变量
+系统状态(全局可用)
+- fps 当前FPS
+- heapUse 当前内存占用(MB)
+游戏状态(游戏进行时可用)
+- _map 当前地图对象
+- map.name
+- map.id
+- map.desc
+- map.author
+- map.fileName
+- map.height
+- map.width
+- state.allUnit 总单位数
+- state.allBan 被禁封总数
+- state.playerSize 当前玩家总数
+玩家状态(发送给玩家的消息内可用,部分语句中的player非消息接收者)
+- _player 接收玩家对象
+- _player._info 接收玩家的额外信息对象
+- player.name
+- player.uuid
+- player.ip
+- player.playedTime
+- player.level 玩家等级(插件数据)
+- player.exp 玩家经验(插件数据)
+- player.maxExp 玩家升级所需经验(插件数据)
+- _team 玩家队伍对象
+- team.name 队伍名
+- team.color 队伍颜色(\[#xxxxxx\])
+- team.colorizeName 带颜色的队伍名
 
 ### 未来计划
 - 增加反捣乱措施
 - 完善用户等级机制
 - 直接地图评价机制
 - 增加对沙盒和编辑器模式的支持
-- 国际化支持(每个玩家单独语言)
+- ~~国际化支持(每个玩家单独语言)~~Finished
 
 ### 更新日记及下载
 请见[发布页](https://github.com/way-zer/MyMindustryPlugin/releases)

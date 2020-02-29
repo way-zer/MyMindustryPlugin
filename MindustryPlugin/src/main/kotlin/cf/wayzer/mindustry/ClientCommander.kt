@@ -60,7 +60,7 @@ object ClientCommander {
             | [green]Ip地址[]:{player.ip}
             | [green]总在线时间(分钟)[]:{player.playedTime}
             | [green]当前等级[]:{player.level}
-            | [green]当前经验[]:[blue]{player.exp}[]/{player.level}
+            | [green]当前经验[]:[blue]{player.exp}[]/{player.maxExp}
             | [#2B60DE]=======================================[]
             | [yellow]说明: 因为性能考虑,数据不会动态刷新. 经验目前只能通过活动奖励
         """.trimMargin().i18n(), I18nHelper.MsgType.InfoMessage)
@@ -202,6 +202,7 @@ object ClientCommander {
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
         //auto reload before maps and change map
 //        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
+        handler.register("lang", "[lang]", "实验性功能: 切换语言", ::onChangeLang)
         handler.register("robot", "实验性功能: 召唤专用鬼怪建筑机", ::onExperiment)
     }
 
@@ -242,6 +243,20 @@ object ClientCommander {
                 return p.sendMessage("[green]Ban成功 {player.name}".i18n("_player" to it))
             }
             p.sendMessage("[red]找不到改用户,请确定三位字母id输入正确! /list 或 /ban 查看".i18n())
+        }
+    }
+
+    private fun onChangeLang(arg: Array<String>, p: Player) {
+        //TODO Expr without i18n
+        if (!Data.adminList.contains(p.uuid))
+            return p.sendMessage("[red]你没有权限使用该命令")
+        p.sendMessage("[yellow]该功能目前正处于实验阶段，有问题请立即与WayZer联系")
+        val lang = arg.getOrNull(0)
+        if (lang != null && Config.base.allLang.contains(lang)) {
+            Data.playerData[p.uuid] = Data.playerData[p.uuid]!!.copy(selectedLang = lang)
+            p.sendMessage("[green]操作成功")
+        } else {
+            p.sendMessage("[yellow]可用语言:" + Config.base.allLang.joinToString())
         }
     }
 
