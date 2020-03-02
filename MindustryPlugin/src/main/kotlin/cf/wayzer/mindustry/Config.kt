@@ -37,8 +37,10 @@ object Config {
             val pvpProtectTime: Duration = Duration.ofMinutes(10),
             val enableInternMaps: Boolean = false,
             val mapsDistinguishMode: Boolean = true,
+            val welcomeType: I18nHelper.MsgType = I18nHelper.MsgType.InfoToast,
+            val gameOverMsgType: I18nHelper.MsgType = I18nHelper.MsgType.InfoMessage,
             val alertTime: Duration = Duration.ofMinutes(20),
-            val alertUseToast: Boolean = false,
+            val alertType: I18nHelper.MsgType = I18nHelper.MsgType.Message,
             val alerts: List<String> = listOf(),
             val defaultLang: String = "custom",
             val allLang: List<String> = listOf("custom")

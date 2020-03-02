@@ -3,6 +3,7 @@ package cf.wayzer.mindustry
 import arc.Core
 import arc.util.Time
 import cf.wayzer.i18n.I18nApi
+import cf.wayzer.i18n.I18nApi.i18n
 import cf.wayzer.i18n.I18nSentence
 import cf.wayzer.i18n.PlaceHoldHandler
 import mindustry.Vars
@@ -82,7 +83,7 @@ object I18nHelper {
     }
 
     fun Player.sendMessage(msg: I18nSentence, type: MsgType = MsgType.Message, time: Float = 10f) {
-        val text = msg.bindForPlayer(this).toString()
+        val text = "{msg}".i18n("msg" to msg).bindForPlayer(this).toString()
         when (type) {
             MsgType.Message -> sendMessage(text)
             MsgType.InfoMessage -> Call.onInfoMessage(this.con, text)

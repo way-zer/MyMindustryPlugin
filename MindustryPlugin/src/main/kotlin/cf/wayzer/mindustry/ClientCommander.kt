@@ -144,7 +144,7 @@ object ClientCommander {
                 }
                 if (state.rules.pvp && player.team != target.team)
                     return player.sendMessage("[red]PVP模式禁止踢出其他队玩家".i18n())
-                val result = VoteHandler.startVote("踢人({player.name}[yellow]踢出[red]{target.name}[yellow])".i18n("target.name" to target.name)) {
+                val result = VoteHandler.startVote("踢人({player.name}[yellow]踢出[red]{target.name}[yellow])".i18n("target.name" to target.name, "_player" to player)) {
                     VoteHandler.otherData = ""
                     if (Data.adminList.contains(target.uuid)) {
                         return@startVote Helper.broadcast("[red]错误: 目标玩家为管理员, 如有问题请与服主联系".i18n())

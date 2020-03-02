@@ -26,10 +26,7 @@ object ScheduleTasks {
         } else if (Config.base.alerts.isNotEmpty()) {
             data %= Config.base.alerts.size
             val msg = Config.base.alerts[data]
-            if (Config.base.alertUseToast)
-                Helper.broadcast(msg.i18n(), I18nHelper.MsgType.InfoToast, 15f)
-            else
-                Helper.broadcast(msg.i18n(), I18nHelper.MsgType.Message, 15f)
+            Helper.broadcast(msg.i18n(), Config.base.alertType, 15f)
             data++
         }
         return@ScheduleTask Config.base.alertTime.delayToDate()

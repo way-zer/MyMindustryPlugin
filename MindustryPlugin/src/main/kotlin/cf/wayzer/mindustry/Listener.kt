@@ -4,6 +4,7 @@ import arc.Core
 import arc.Events
 import arc.util.Time
 import cf.wayzer.i18n.I18nApi.i18n
+import cf.wayzer.i18n.I18nSentence
 import cf.wayzer.mindustry.Data.playerData
 import cf.wayzer.mindustry.I18nHelper.sendMessage
 import mindustry.Vars
@@ -47,8 +48,7 @@ object Listener {
                 | 下一张地图为:[accent]{map.name}[] By: [accent]{map.author}[]
                 | 下一场游戏将在 {waitTime} 秒后开始
             """.trimMargin().i18n("winnerMsg" to winnerMsg, "waitTime" to Config.base.waitingTime.seconds)
-            Helper.broadcast(msg, I18nHelper.MsgType.InfoToast, quite = true)
-            Helper.broadcast(msg, I18nHelper.MsgType.Message, quite = true)
+            Helper.broadcast(msg, Config.base.gameOverMsgType, quite = true)
             Helper.logToConsole("Next map is ${map.name()}")
             Main.timer.schedule(Config.base.waitingTime.toMillis()) {
                 Helper.loadMap(map)
@@ -84,7 +84,7 @@ object Listener {
             e.player?.con?.kick(Packets.KickReason.banned)
         }
         //Quit PVP mode when no player
-        Events.on(EventType.PlayerLeave::class.java) { _ ->
+        Events.on(EventType.PlayerLeave::class.java) {
             if (!Vars.state.rules.pvp) return@on
             Core.app.post {
                 if (!Vars.playerGroup.isEmpty) return@post
@@ -130,7 +130,7 @@ object Listener {
                 |Welcome to this Server
                 |[green]欢迎{player.name}[green]来到本服务器[]
                 |[yellow]请config下建立lang/lang-custom.lang以修改本提示
-            """.trimMargin().i18n(), I18nHelper.MsgType.InfoToast, 30f)
+            """.trimMargin().i18n(), Config.base.welcomeType, 30f)
             VoteHandler.handleJoin(e.player)
         }
         Events.on(EventType.PlayerLeave::class.java) { e ->
@@ -164,21 +164,18 @@ object Listener {
         }
         Events.on(EventType.UnitCreateEvent::class.java) { e ->
             if (e.unit.team == Vars.state.rules.waveTeam) return@on
+            fun alertInTeam(text: I18nSentence) {
+                if (RuntimeData.Intervals.UnitWarn())
+                    Vars.playerGroup.all().forEach {
+                        if (it.team == e.unit.team)
+                            it.sendMessage(text, I18nHelper.MsgType.InfoToast, 6f)
+                    }
+            }
             when (val count = Vars.unitGroup.count { it.team == e.unit.team }) {
                 in Config.base.unitWarnRange ->
-                    if (RuntimeData.Intervals.UnitWarn())
-                        Vars.playerGroup.all().forEach {
-                            if (it.team == e.unit.team) {
-                                it.sendMessage("[yellow]警告: 建筑过多单位,可能造成服务器卡顿,当前: {count}".i18n("count" to count), I18nHelper.MsgType.InfoToast, 6f)
-                            }
-                        }
+                    alertInTeam("[yellow]警告: 建筑过多单位,可能造成服务器卡顿,当前: {count}".i18n("count" to count))
                 in Config.base.unitWarnRange.last..10000 -> {
-                    if (RuntimeData.Intervals.UnitWarn())
-                        Vars.playerGroup.all().forEach {
-                            if (it.team == e.unit.team) {
-                                it.sendMessage("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成".i18n("count" to count), I18nHelper.MsgType.InfoToast, 6f)
-                            }
-                        }
+                    alertInTeam("[red]警告: 建筑过多单位,可能造成服务器卡顿,已禁止生成".i18n("count" to count))
                     e.unit.kill()
                 }
             }

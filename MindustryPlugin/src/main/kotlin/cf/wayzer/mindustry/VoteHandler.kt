@@ -24,7 +24,6 @@ object VoteHandler {
         }
         doing = true
         if (playerGroup.size() != 1) one = false
-        // C as default color
         broadcast("[yellow]{type}[yellow]投票开始,输入y同意".i18n("type" to type))
         welcomeMessage = "[yellow]当前正在进行{type}[yellow]投票，输入y同意".i18n("type" to type)
         task = Main.timer.schedule(Config.vote.voteTime.toMillis()) {
