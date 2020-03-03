@@ -18,6 +18,7 @@ import mindustry.io.SaveIO
 import mindustry.maps.Map
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.schedule
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -28,7 +29,7 @@ object Helper {
             Vars.state.rules = Vars.world.map.applyRules(mode)
             Vars.logic.play()
         }
-        Core.app.post {
+        Main.timer.schedule(2000L) {
             //After reset And Load
             when (mode) {
                 Gamemode.pvp -> {
@@ -37,6 +38,7 @@ object Helper {
                         broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续{timeMin}分钟)".i18n("timeMin" to Config.base.pvpProtectTime.toMinutes()))
                     }, {
                         if (Vars.world.map != map) return@DownTime false
+                        RuntimeData.pvpProtect = true
                         broadcast("[yellow]PVP保护时间还剩 {timeMin} 分钟".i18n("timeMin" to it), I18nHelper.MsgType.InfoToast, 10f)
                         return@DownTime true
                     }, {
@@ -44,7 +46,7 @@ object Helper {
                         broadcast("[yellow]PVP保护时间已结束, 全力进攻吧".i18n())
                     }).apply(DownTime::start)
                 }
-                else -> return@post
+                else -> return@schedule
             }
         }
     }
@@ -153,6 +155,8 @@ object Helper {
     private class MyAssigner(private val old: NetServer.TeamAssigner) : NetServer.TeamAssigner {
         override fun assign(player: Player, p1: MutableIterable<Player>): Team {
             if (!Vars.state.rules.pvp) return Vars.state.rules.defaultTeam
+            if (RuntimeData.teams[player.uuid]?.active() == false)
+                RuntimeData.teams.remove(player.uuid)
             return RuntimeData.teams.getOrPut(player.uuid) {
                 //not use old,because it may assign to team without core
                 val teams = Vars.state.teams.active.filter { it.hasCore() }

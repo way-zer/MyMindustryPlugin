@@ -190,6 +190,7 @@ object ClientCommander {
         if (player.team == Config.spectateTeam)
             return player.sendMessage("[red]你已经是观察者了".i18n())
         Helper.broadcast("[yellow]玩家[green]{player.name}[yellow]选择成为观察者".i18n(), quite = true)
+        RuntimeData.teams[player.uuid] = Config.spectateTeam
         player.team = Config.spectateTeam
         player.lastSpawner = null
         player.spawner = null
