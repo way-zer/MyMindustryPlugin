@@ -103,10 +103,15 @@ object Listener {
         var t = 0
         Events.on(EventType.Trigger.update) {
             if (!RuntimeData.pvpProtect) return@on
-            t = (t + 1) % 180
-            if (t != 0) return@on //per 60ticks | 3 seconds
+            t = (t + 1) % 60
+            if (t != 0) return@on //per 60ticks | 1 seconds
+            Vars.unitGroup.forEach {
+                if (Vars.state.teams.closestEnemyCore(it.x, it.y, it.team)?.withinDst(it, Vars.state.rules.enemyCoreBuildRadius) == true) {
+                    it.kill()
+                }
+            }
             Vars.playerGroup.forEach {
-                if (it.isShooting && Vars.state.teams.closestEnemyCore(it.pointerX, it.pointerY, it.team)?.withinDst(it, Vars.state.rules.enemyCoreBuildRadius) == true) {
+                if (it.isShooting && Vars.state.teams.closestEnemyCore(it.x, it.y, it.team)?.withinDst(it, Vars.state.rules.enemyCoreBuildRadius) == true) {
                     it.sendMessage("[red]PVP保护时间,禁止在其他基地攻击".i18n())
                     it.kill()
                 }
