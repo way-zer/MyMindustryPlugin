@@ -39,7 +39,7 @@ object Helper {
                     }, {
                         if (Vars.world.map != map) return@DownTime false
                         RuntimeData.pvpProtect = true
-                        broadcast("[yellow]PVP保护时间还剩 {timeMin} 分钟".i18n("timeMin" to it), I18nHelper.MsgType.InfoToast, 10f)
+                        broadcast("[yellow]PVP保护时间还剩 {timeMin} 分钟".i18n("timeMin" to it), I18nHelper.MsgType.InfoToast, 10f, quite = true)
                         return@DownTime true
                     }, {
                         RuntimeData.pvpProtect = false
@@ -72,10 +72,10 @@ object Helper {
     }
 
     fun listMap(p: Int, mode: Gamemode? = Gamemode.survival): I18nSentence {
-        val prePage = 7
+        val prePage = Config.base.mapsPrePage
         val maps = Config.maps.mapIndexed { index, map -> (index + 1) to map }
                 .filter { mode == null || bestMode(it.second) == mode }
-        val totalPage = ceil(maps.size / 7f).toInt()
+        val totalPage = ceil(maps.size.toDouble() / prePage).toInt()
         var page = p
         if (page < 1) page = 1
         if (page > totalPage) page = totalPage

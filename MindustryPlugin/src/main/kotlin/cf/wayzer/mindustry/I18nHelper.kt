@@ -42,8 +42,8 @@ object I18nHelper {
         registerVar("_map") { Vars.world.map }
         registerVar("map.name") { (it("_map") as? Map)?.name() }
         registerVar("map.id") {
-            (it("_map") as? Map)?.let {
-                Config.maps.indexOf(it, true)
+            it("map.name")?.let { name ->
+                Config.maps.indexOfFirst { it.name() == name }
             }
         }
         registerVar("map.desc") { (it("_map") as? Map)?.description() }

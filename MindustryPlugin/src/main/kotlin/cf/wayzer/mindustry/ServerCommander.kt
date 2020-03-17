@@ -12,7 +12,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object ServerCommander {
+    internal lateinit var commandHandler: CommandHandler
     fun register(handler: CommandHandler) {
+        commandHandler = handler
         handler.removeCommand("maps")
         handler.removeCommand("host")
         handler.removeCommand("load")
@@ -26,6 +28,7 @@ object ServerCommander {
         handler.register("reloadConfig", "reload plugin config") {
             Config.load()
             I18nApi.resetCache()
+            Helper.logToConsole("[green]重载成功")
         }
     }
 

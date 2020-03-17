@@ -189,7 +189,7 @@ object ClientCommander {
     private fun onSpectate(arg: Array<String>, player: Player) {
         if (player.team == Config.spectateTeam)
             return player.sendMessage("[red]你已经是观察者了".i18n())
-        Helper.broadcast("[yellow]玩家[green]{player.name}[yellow]选择成为观察者".i18n(), quite = true)
+        Helper.broadcast("[yellow]玩家[green]{player.name}[yellow]选择成为观察者".i18n("_player" to player), quite = true)
         RuntimeData.teams[player.uuid] = Config.spectateTeam
         player.team = Config.spectateTeam
         player.lastSpawner = null
@@ -204,6 +204,7 @@ object ClientCommander {
         //auto reload before maps and change map
 //        handler.register("reloadMaps","管理指令: 重载地图",::onReloadMaps)
         handler.register("lang", "[lang]", "实验性功能: 切换语言", ::onChangeLang)
+        handler.register("unsafe", "[cmd...]", "管理指令(危险): 使用后台执行命令", ::onUnsafe)
         handler.register("robot", "实验性功能: 召唤专用鬼怪建筑机", ::onExperiment)
     }
 
@@ -259,6 +260,18 @@ object ClientCommander {
         } else {
             p.sendMessage("[yellow]可用语言:" + Config.base.allLang.joinToString())
         }
+    }
+
+    private fun onUnsafe(arg: Array<String>, p: Player) {
+        if (!Data.adminList.contains(p.uuid))
+            return p.sendMessage("[red]你没有权限使用该命令")
+        if (!Config.base.unsafeCommands.contains(arg[0].split(' ')[0]))
+            return p.sendMessage("[red]未允许执行该命令: ${arg[0]}")
+        p.sendMessage("[yellow]不受支持的功能: 由该功能导致的崩服不受支持, 无法显示命令反馈结果")
+        val res = ServerCommander.commandHandler.handleMessage(arg[0])
+        if (res.type != CommandHandler.ResponseType.valid)
+            return p.sendMessage("[red]请检测命令是否正确: ${res.command?.paramText}")
+        p.sendMessage("[green]执行成功")
     }
 
     @Suppress("UNUSED_PARAMETER")

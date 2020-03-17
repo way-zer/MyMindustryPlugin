@@ -35,8 +35,11 @@ object Config {
             //下一轮等待时间
             val waitingTime: Duration = Duration.ofSeconds(10),
             val pvpProtectTime: Duration = Duration.ofMinutes(10),
+            val autoHost: Boolean = false,
             val enableInternMaps: Boolean = false,
             val mapsDistinguishMode: Boolean = true,
+            val mapsPrePage: Int = 7,
+            val unsafeCommands: List<String> = listOf(),
             val welcomeType: I18nHelper.MsgType = I18nHelper.MsgType.InfoToast,
             val gameOverMsgType: I18nHelper.MsgType = I18nHelper.MsgType.InfoMessage,
             val alertTime: Duration = Duration.ofMinutes(20),
