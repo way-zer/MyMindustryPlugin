@@ -7,7 +7,6 @@ import arc.util.Log
 import cf.wayzer.i18n.I18nApi.i18n
 import cf.wayzer.i18n.I18nSentence
 import cf.wayzer.mindustry.I18nHelper.sendMessage
-import cf.wayzer.mindustry.util.DownTime
 import mindustry.Vars
 import mindustry.core.NetServer
 import mindustry.entities.type.Player
@@ -32,20 +31,7 @@ object Helper {
         Main.timer.schedule(2000L) {
             //After reset And Load
             when (mode) {
-                Gamemode.pvp -> {
-                    RuntimeData.protectDownTime = DownTime(Config.base.pvpProtectTime.toMillis(), {
-                        RuntimeData.pvpProtect = true
-                        broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续{timeMin}分钟)".i18n("timeMin" to Config.base.pvpProtectTime.toMinutes()))
-                    }, {
-                        if (Vars.world.map != map) return@DownTime false
-                        RuntimeData.pvpProtect = true
-                        broadcast("[yellow]PVP保护时间还剩 {timeMin} 分钟".i18n("timeMin" to it), I18nHelper.MsgType.InfoToast, 10f, quite = true)
-                        return@DownTime true
-                    }, {
-                        RuntimeData.pvpProtect = false
-                        broadcast("[yellow]PVP保护时间已结束, 全力进攻吧".i18n())
-                    }).apply(DownTime::start)
-                }
+                Gamemode.pvp -> ScheduleTasks.pvpProtectTask.start()
                 else -> return@schedule
             }
         }

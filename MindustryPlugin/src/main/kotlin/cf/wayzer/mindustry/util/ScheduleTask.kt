@@ -9,6 +9,8 @@ import kotlin.concurrent.schedule
 open class ScheduleTask<T : Any>(val task: ScheduleTask<T>.(first: Boolean) -> Date?) {
     //Null when first
     var timerTask: TimerTask? = null
+    var params: Array<out Any> = emptyArray()
+
     //Any data you want save
     lateinit var data: T
 
@@ -17,7 +19,9 @@ open class ScheduleTask<T : Any>(val task: ScheduleTask<T>.(first: Boolean) -> D
         timerTask = Main.timer.schedule(task(false) ?: let { return cancel() }, ::run)
     }
 
-    fun start() {
+    fun start(vararg params: Any) {
+        this.params = params
+        timerTask?.cancel()
         timerTask = Main.timer.schedule(task(true) ?: let { return cancel() }, ::run)
     }
 

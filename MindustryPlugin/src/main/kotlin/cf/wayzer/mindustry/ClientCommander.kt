@@ -36,6 +36,7 @@ object ClientCommander {
         handler.register("vote", "<map/gameOver/kick/skipWave/rollback> [params...]",
                 "进行投票:换图/投降/踢人/跳波/回滚", ::onVote)
         handler.register("spectate", "变为观察者", ::onSpectate)
+        handler.register("ob", "变为观察者", ::onSpectate)
         registerAdmin(handler)
     }
 
@@ -105,13 +106,9 @@ object ClientCommander {
             "skipwave" -> {
                 if (VoteHandler.doing)
                     return player.sendMessage("[red]投票进行中".i18n())
+                val num = arg.getOrNull(2)?.toIntOrNull() ?: 10
                 VoteHandler.startVote("跳波".i18n(), true) {
-                    var i = 0
-                    Main.timer.schedule(0, Config.vote.skipWaveInterval.toMillis()) {
-                        if (state.gameOver || state.enemies > 300 || i >= 10) cancel()
-                        i++
-                        logic.runWave()
-                    }
+                    ScheduleTasks.runWaveTask.start(num)
                 }
             }
             "rollback" -> {

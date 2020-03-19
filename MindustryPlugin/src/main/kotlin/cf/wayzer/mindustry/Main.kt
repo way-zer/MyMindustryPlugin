@@ -5,11 +5,9 @@ import arc.util.CommandHandler
 import cf.wayzer.libraryManager.Dependency
 import cf.wayzer.libraryManager.LibraryManager
 import cf.wayzer.mindustry.util.IntRangeReader
-import mindustry.Vars
 import mindustry.plugin.Plugin
 import java.nio.file.Paths
 import java.util.*
-import kotlin.concurrent.schedule
 
 class Main : Plugin() {
     override fun init() {
@@ -20,13 +18,6 @@ class Main : Plugin() {
         Helper.setTeamAssigner()
         Listener.register()
         ScheduleTasks.allStart()
-        if (Config.base.autoHost) {
-            Helper.logToConsole("Auto Host after 5 seconds")
-            timer.schedule(5000L) {
-                if (!Vars.net.server()) Vars.netServer.openServer()
-                Helper.loadMap()
-            }
-        }
     }
 
     override fun registerServerCommands(handler: CommandHandler) {

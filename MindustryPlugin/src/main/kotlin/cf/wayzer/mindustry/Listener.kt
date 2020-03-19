@@ -34,6 +34,15 @@ object Listener {
     }
 
     private fun registerGameControl() {
+        Events.on(EventType.ServerLoadEvent::class.java) {
+            if (Config.base.autoHost) {
+                Helper.logToConsole("Auto Host after 5 seconds")
+                Main.timer.schedule(5000L) {
+                    if (!Vars.net.server()) Vars.netServer.openServer()
+                    Helper.loadMap()
+                }
+            }
+        }
         Events.on(EventType.GameOverEvent::class.java) { e ->
             if (Vars.state.rules.pvp)
                 Helper.logToConsole("&lcGame over! Team &ly${e.winner.name}&lc is victorious with &ly${Vars.playerGroup.size()}&lc players online on map &ly${Vars.world.map.name()}&lc.")
@@ -47,7 +56,7 @@ object Listener {
                 | {winnerMsg}
                 | 下一张地图为:[accent]{map.name}[] By: [accent]{map.author}[]
                 | 下一场游戏将在 {waitTime} 秒后开始
-            """.trimMargin().i18n("winnerMsg" to winnerMsg, "waitTime" to Config.base.waitingTime.seconds)
+            """.trimMargin().i18n("_map" to map, "winnerMsg" to winnerMsg, "waitTime" to Config.base.waitingTime.seconds)
             Helper.broadcast(msg, Config.base.gameOverMsgType, quite = true)
             Helper.logToConsole("Next map is ${map.name()}")
             Main.timer.schedule(Config.base.waitingTime.toMillis()) {
