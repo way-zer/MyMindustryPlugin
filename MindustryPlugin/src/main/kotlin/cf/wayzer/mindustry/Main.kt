@@ -47,7 +47,7 @@ class Main : Plugin() {
     }
 
     companion object {
-        private const val kotlinVersion = "1.3.41"
+        private const val kotlinVersion = "1.3.70"
         val timer = Timer(true)
 
         init {
