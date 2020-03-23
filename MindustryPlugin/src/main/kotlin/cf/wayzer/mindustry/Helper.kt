@@ -94,9 +94,13 @@ object Helper {
     }
 
     fun nextMap(map: Map? = null, mode: Gamemode = Gamemode.survival): Map {
-        val maps = Config.maps.copy()
-        maps.shuffle()
-        return maps.filter { bestMode(it) == mode }.firstOrNull { it != map } ?: maps[0]
+        val maps = Config.maps.shuffled()
+        val ret = Config.maps.shuffled().filter { bestMode(it) == mode }.firstOrNull { it != map } ?: maps[0]
+        if (!SaveIO.isSaveValid(ret.file)) {
+            logToConsole("[yellow]invalid map ${ret.file.nameWithoutExtension()}, auto change")
+            return nextMap(map, mode)
+        }
+        return ret
     }
 
     fun bestMode(map: Map): Gamemode {

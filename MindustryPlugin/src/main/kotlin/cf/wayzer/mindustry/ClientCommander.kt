@@ -84,6 +84,8 @@ object ClientCommander {
                     return player.sendMessage("[red]投票进行中".i18n())
                 val map = Config.maps[id - 1]
                 VoteHandler.startVote("换图({map.id}: [yellow]{map.name}[yellow])".i18n("_map" to map), true) {
+                    if (!SaveIO.isSaveValid(map.file))
+                        return@startVote Helper.broadcast("[red]换图失败,地图[yellow]{map.name}[green](id: {map.id})[red]已损坏".i18n("_map" to map))
                     Helper.loadMap(map)
                     Main.timer.schedule(TimeUnit.SECONDS.toMillis(5)) {
                         Helper.broadcast("[green]换图成功,当前地图[yellow]{map.name}[green](id: {map.id})".i18n())
