@@ -16,7 +16,7 @@ ext{
 gitVersioning.apply({
     tag{
         pattern = "v(?<tagVersion>[0-9].*)"
-        versionFormat = "\${tagVersion}\${dirty}"
+        versionFormat = "\${tagVersion}"
     }
     commit{
         versionFormat = "\${version}-\${commit.short}\${dirty}"
