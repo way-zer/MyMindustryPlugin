@@ -19,6 +19,7 @@ import org.mapdb.DBMaker
 import org.mapdb.Serializer
 import java.util.*
 import kotlin.concurrent.schedule
+import kotlin.random.Random
 
 object Listener {
     var lastJoin = Long.MAX_VALUE
@@ -93,9 +94,14 @@ object Listener {
             e.player?.con?.kick(Packets.KickReason.banned)
         }
         //Quit PVP mode when no player
-        Events.on(EventType.PlayerLeave::class.java) {
+        Events.on(EventType.PlayerLeave::class.java) { e ->
             if (!Vars.state.rules.pvp) return@on
             Core.app.post {
+                if (Vars.playerGroup.count { it.team == e.player.team } == 0) {
+                    Vars.state.teams.cores(e.player.team).forEach {
+                        Time.run(Random.nextFloat() * 60 * 3, it::kill)
+                    }
+                }
                 if (!Vars.playerGroup.isEmpty) return@post
                 val next = Helper.nextMap()
                 //Prevent only PVP server

@@ -36,12 +36,12 @@ object ScheduleTasks {
     val pvpProtectTask = ScheduleTask<Long> { firstRun ->
         val time = Config.base.pvpProtectTime.toMillis()
         if (firstRun) {
-            data = System.currentTimeMillis() //save startTime
+            data = System.currentTimeMillis() + 10000 //save startTime
             RuntimeData.pvpProtect = true
             Helper.broadcast("[yellow]PVP保护时间,禁止在其他基地攻击(持续{timeMin}分钟)".i18n("timeMin" to Config.base.pvpProtectTime.toMinutes()))
             return@ScheduleTask ((time - 1) % (60 * 1000L)).delayToDate()
         } else {
-            if (RuntimeData.startTime > time) return@ScheduleTask null //map changed
+            if (RuntimeData.startTime > data) return@ScheduleTask null //map changed
             val min = Duration.ofMillis((time + 1) - (System.currentTimeMillis() - data)).toMinutes()
             if (min <= 0) {
                 RuntimeData.pvpProtect = false
