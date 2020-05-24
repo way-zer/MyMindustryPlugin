@@ -2,6 +2,8 @@
 Essitial plugin for Mindustry (now only Chinese,need English version open an issue).  
 当前使用在我自己服务器 m.tiny:smile:lake.tk
 
+**计划转移到脚本实现，本插件更新停滞**(详见https://github.com/way-zer/ScriptAgent4MindustryExt/tree/mergeFromPlugin)
+
 ## 功能介绍
 1. 重写默认换图机制(可以根据文件名首字母确定模式 S生存P对抗A攻击C沙盒创造E编辑器模式)
 2. 完整投票功能(跳波,换图,踢人,投降,回滚)
@@ -46,6 +48,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 系统状态(全局可用)
 - fps 当前FPS
 - heapUse 当前内存占用(MB)
+
 游戏状态(游戏进行时可用)
 - _map 当前地图对象
 - map.name
@@ -58,6 +61,7 @@ Essitial plugin for Mindustry (now only Chinese,need English version open an iss
 - state.allUnit 总单位数
 - state.allBan 被禁封总数
 - state.playerSize 当前玩家总数
+
 玩家状态(发送给玩家的消息内可用,部分语句中的player非消息接收者)
 - _player 接收玩家对象
 - _player._info 接收玩家的额外信息对象
