@@ -99,4 +99,5 @@ ls #可以看到生成的jar文件
 ```
 
 ## 关于授权(License)
-目前保留权限,只允许个人修改及使用,转载请注明[出处](https://github.com/way-zer/MyMindustryPlugin)
+目前保留权限,只允许个人修改及使用,转载请注明[出处](https://github.com/way-zer/MyMindustryPlugin)  
+交流群: 1033116078
