@@ -198,6 +198,7 @@ object ClientCommander {
 
     private fun registerAdmin(handler: CommandHandler) {
         //Admin command
+        handler.register("team", "[队伍,不填列出] [玩家3位id,默认自己]", "管理指令: 修改自己或他人队伍(PVP模式)", ::changeTeam)
         handler.register("list", "管理指令: 列出当前所有玩家信息", ::onListPlayer)
         handler.register("ban", "[3位id]", "管理指令: 列出已ban用户，ban或解ban", ::onBan)
         //auto reload before maps and change map
@@ -205,6 +206,22 @@ object ClientCommander {
         handler.register("lang", "[lang]", "实验性功能: 切换语言", ::onChangeLang)
         handler.register("unsafe", "[cmd...]", "管理指令(危险): 使用后台执行命令", ::onUnsafe)
         handler.register("robot", "实验性功能: 召唤专用鬼怪建筑机", ::onExperiment)
+    }
+
+    private fun changeTeam(arg: Array<String>, p: Player) {
+        if (!Data.adminList.contains(p.uuid))
+            return p.sendMessage("[red]你没有权限使用该命令".i18n())
+        if (!state.rules.pvp) p.sendMessage("[red]仅PVP模式可用".i18n())
+        val team = arg.getOrNull(0)?.toIntOrNull()?.let { Team.get(it) } ?: let {
+            val teams = Team.base().mapIndexed { i, t -> "{id}({team.colorizeName}[]) ".i18n("id" to i, "_team" to t) }
+            return p.sendMessage("[yellow]可用队伍: []{list}".i18n("list" to teams))
+        }
+        val player = arg.getOrNull(1)?.let {
+            playerGroup.find { p -> p.uuid.startsWith(it) } ?: return p.sendMessage("[red]找不到玩家,请使用/list查询正确的3位id")
+        } ?: p
+        RuntimeData.teams[player.uuid] = team
+        player.team = team
+        Helper.broadcast("[green]管理员更改了{player.name}[green]为{team.colorizeName}".i18n("_player" to player, "_team" to team))
     }
 
     @Suppress("UNUSED_PARAMETER")
