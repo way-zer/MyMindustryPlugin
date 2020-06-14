@@ -15,6 +15,8 @@ import mindustry.game.Team
 import mindustry.gen.Call
 import mindustry.io.SaveIO
 import mindustry.net.Packets
+import mindustry.world.blocks.storage.CoreBlock
+import mindustry.world.blocks.units.MechPad
 import java.lang.Integer.min
 import java.text.SimpleDateFormat
 import java.util.*
@@ -192,6 +194,10 @@ object ClientCommander {
         RuntimeData.teams[player.uuid] = Config.spectateTeam
         player.team = Config.spectateTeam
         player.lastSpawner = null
+        when (val t = player.spawner) {
+            is CoreBlock.CoreEntity -> Call.onUnitRespawn(t.tile, player)
+            is MechPad.MechFactoryEntity -> Call.onMechFactoryDone(t.tile)
+        }
         player.spawner = null
         Call.onPlayerDeath(player)
     }
